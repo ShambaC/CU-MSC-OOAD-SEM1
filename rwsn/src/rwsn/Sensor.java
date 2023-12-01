@@ -1,5 +1,6 @@
 package rwsn;
 
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import javax.swing.ImageIcon;
@@ -32,6 +33,10 @@ public class Sensor implements DisplayObject {
 			this.needCharge = false;
 		}
 
+		if(this.remainingEnergy <= 0) {
+			this.remainingEnergy = 0;
+		}
+
 		int dataTypeChoice = (int)(Math.random() * 3);
 
 		if(this.remainingEnergy <= 0) {
@@ -62,8 +67,15 @@ public class Sensor implements DisplayObject {
 	@Override
 	public void draw(Graphics2D g) {
 		g.drawImage(img,x,y,50,70,null);
+		if(this.needCharge) {
+			g.setColor(Color.RED);
+		}
+		else {
+			g.setColor(Color.GREEN);
+		}
 		g.drawString(String.valueOf(remainingEnergy), x, y+5);
-		g.drawString(String.valueOf(this.id), x, y-5);
+		g.setColor(Color.BLACK);
+		g.drawString(String.valueOf(this.id), x, y+40);
 	}
 
 }

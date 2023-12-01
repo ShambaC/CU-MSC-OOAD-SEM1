@@ -94,8 +94,15 @@ public class MainFrame extends JFrame implements ActionListener{
 				// Find nearest charger for the sensor
 				Sensor needsChargeS = sensorsList.get(chargeRequestId);
 				double distance = 9999.0f;
-				int chargerID;
+				int chargerID = -1;
 				for(Charger o:chargersList) {
+					// Check if the charger has enough energy to charge the sensor
+					if(o.remainingEnergy <= 0) {
+						// if charger has been depleted then look for the next nearest charger with energy
+						continue;
+					}
+
+					// Calculate distance from charger to sensor to find the nearest charger
 					double tempD;
 					tempD = Math.sqrt((Math.pow((needsChargeS.x - o.x), 2)) + (Math.pow((needsChargeS.y - o.y), 2)));
 					if(tempD <= distance) {
@@ -103,6 +110,14 @@ public class MainFrame extends JFrame implements ActionListener{
 						chargerID = o.id;
 					}
 				}
+				// Add the sensor to the charger's queue
+				if(chargerID != -1)
+					chargersList.get(chargerID).addSensor(needsChargeS);
+			}
+
+			// Charge sensors in each Charger's queue
+			for(Charger o:chargersList) {
+				o.chargeSensor();
 			}
 
 			f.canvas.repaint();
