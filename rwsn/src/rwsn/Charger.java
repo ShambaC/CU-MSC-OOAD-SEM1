@@ -2,9 +2,7 @@ package rwsn;
 
 import java.awt.Graphics2D;
 import java.awt.Image;
-import java.awt.List;
 import java.util.ArrayDeque;
-import java.util.ArrayList;
 import java.util.Queue;
 
 import javax.swing.ImageIcon;
