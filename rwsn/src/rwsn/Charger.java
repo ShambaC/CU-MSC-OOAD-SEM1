@@ -20,6 +20,7 @@ public class Charger implements DisplayObject {
 	public void draw(Graphics2D g) {
 		g.drawImage(img,x,y,50,70,null);
 		g.drawString(String.valueOf(remainingEnergy), x, y+5);
+		g.drawString(String.valueOf(this.id), x, y-5);
 	}
 
 }

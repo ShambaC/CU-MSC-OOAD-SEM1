@@ -16,6 +16,7 @@ public class MainFrame extends JFrame implements ActionListener{
 
 	DisplayCanvas canvas = new DisplayCanvas();
 	static ArrayList<Sensor> sensorsList = new ArrayList<Sensor>();
+	static ArrayList<Charger> chargersList = new ArrayList<Charger>();
 	
 
 	public MainFrame() {
@@ -34,6 +35,7 @@ public class MainFrame extends JFrame implements ActionListener{
 			int y = (int)(Math.random()*(d.getHeight()-150)+0.5);					
 			Charger c = new Charger(x, y, i);
 			canvas.chargers.add(c);
+			chargersList.add(c);
 		}
 		for(int i=0;i<ns;i++) {
 			int x = (int)(Math.random()*d.getWidth()+0.5);
@@ -85,10 +87,23 @@ public class MainFrame extends JFrame implements ActionListener{
 				}
 			}
 
-			// Get sensor that requires charging with highest priority
-			int chargeRequestId = lowEnergySensorList.poll();
-			// Find nearest charger for the sensor
-			
+			// ---CHARGING---
+			if(!lowEnergySensorList.isEmpty()) {
+				// Get sensor that requires charging with highest priority
+				int chargeRequestId = lowEnergySensorList.poll();
+				// Find nearest charger for the sensor
+				Sensor needsChargeS = sensorsList.get(chargeRequestId);
+				double distance = 9999.0f;
+				int chargerID;
+				for(Charger o:chargersList) {
+					double tempD;
+					tempD = Math.sqrt((Math.pow((needsChargeS.x - o.x), 2)) + (Math.pow((needsChargeS.y - o.y), 2)));
+					if(tempD <= distance) {
+						distance = tempD;
+						chargerID = o.id;
+					}
+				}
+			}
 
 			f.canvas.repaint();
 			try {
