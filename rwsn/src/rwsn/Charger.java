@@ -34,12 +34,15 @@ public class Charger implements DisplayObject {
 		if(!toBeChargedSensors.isEmpty()) {
 			// Get the first sensor in queue
 			Sensor S = toBeChargedSensors.poll();
+			// Calculate the energy needed by the sensor
 			double chargeNeeded = Parameters.InitialEnergy - S.remainingEnergy;
 
+			// If the charger doesn't have enough energy, deplete the charger
 			if(chargeNeeded >= this.remainingEnergy) {
 				S.remainingEnergy += this.remainingEnergy;
 				this.remainingEnergy = 0;
 			}
+			// else provide required energy to the sensor
 			else {
 				S.remainingEnergy += chargeNeeded;
 				this.remainingEnergy -= chargeNeeded;

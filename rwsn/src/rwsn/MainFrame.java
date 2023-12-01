@@ -51,14 +51,14 @@ public class MainFrame extends JFrame implements ActionListener{
 		MainFrame f = new MainFrame();
 		f.setVisible(true);
 		
-		ArrayList<Message> sensorData = new ArrayList<Message>();
 		PriorityQueue<Integer> lowEnergySensorList = new PriorityQueue<Integer>();
 
 		while(true) {
 			// get data from sensors
 			for(Sensor o:sensorsList) {
 				Message M = o.getData();
-				sensorData.add(M);
+				// Send message data to baseStation
+				f.canvas.bs.addMessage(M);
 
 				// Check for sensor energy
 				if(o.needCharge) {
@@ -69,23 +69,8 @@ public class MainFrame extends JFrame implements ActionListener{
 			}
 
 			// Display the data received from the sensors
-			for(Message o:sensorData) {
-				switch (o.type) {
-					case "integer":
-						System.out.println(o.id + "=>" + o.type + "=>" + o.data);
-						break;
-					case "double":
-						System.out.println(o.id + "=>" + o.type + "=>" + o.ddata);
-						break;
-					case "string":
-						System.out.println(o.id + "=>" + o.type + "=>" + o.sdata);
-						break;
-				
-					default:
-						System.out.println(o.id + "=> Needs charging");
-						break;
-				}
-			}
+			f.canvas.bs.DisplayMessages();
+			
 
 			// ---CHARGING---
 			if(!lowEnergySensorList.isEmpty()) {

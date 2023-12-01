@@ -25,7 +25,9 @@ public class Sensor implements DisplayObject {
 	}
 
 	public Message getData() {
+		// Use energy
 		this.remainingEnergy -= this.energyDepletionRate;
+		// Determine if sensor needs charging
 		if (this.remainingEnergy < Parameters.ThresholdEnergy) {
 			this.needCharge = true;
 		}
@@ -33,10 +35,12 @@ public class Sensor implements DisplayObject {
 			this.needCharge = false;
 		}
 
+		// Avoid energy from going into negative
 		if(this.remainingEnergy <= 0) {
 			this.remainingEnergy = 0;
 		}
 
+		// Generate random data to pass to BaseStation
 		int dataTypeChoice = (int)(Math.random() * 3);
 
 		if(this.remainingEnergy <= 0) {
