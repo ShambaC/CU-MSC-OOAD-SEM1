@@ -24,16 +24,20 @@ public class Sensor implements DisplayObject {
 		img = new ImageIcon(getClass().getResource("../images/sensor.jpg")).getImage();
 	}
 
-	public Message getData() {
-		// Use energy
-		this.remainingEnergy -= this.energyDepletionRate;
-		// Determine if sensor needs charging
+	public void checkEnergy() {
 		if (this.remainingEnergy < Parameters.ThresholdEnergy) {
 			this.needCharge = true;
 		}
 		else {
 			this.needCharge = false;
 		}
+	}
+
+	public Message getData() {
+		// Use energy
+		this.remainingEnergy -= this.energyDepletionRate;
+		// Determine if sensor needs charging
+		checkEnergy();
 
 		// Avoid energy from going into negative
 		if(this.remainingEnergy <= 0) {

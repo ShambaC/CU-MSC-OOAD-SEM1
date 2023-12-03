@@ -48,14 +48,15 @@ public class Charger implements DisplayObject {
 			if(chargeNeeded >= this.remainingEnergy) {
 				S.remainingEnergy += this.remainingEnergy;
 				this.remainingEnergy = 0;
-				isCharging = true;
 			}
 			// else provide required energy to the sensor
 			else {
 				S.remainingEnergy += chargeNeeded;
 				this.remainingEnergy -= chargeNeeded;
-				isCharging = true;
 			}
+
+			isCharging = true;
+			S.checkEnergy();
 		}
 	}
 	
