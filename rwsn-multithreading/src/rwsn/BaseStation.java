@@ -46,29 +46,37 @@ public class BaseStation extends Thread implements DisplayObject {
 	@Override
 	public void run() {
 		while(true) {
-			Message o = messages.poll();
-			int id = o.id;
-			Sensor S = sensors.get(id);
-			int sX = S.getX();
-			int sY = S.getY();
+			if(!messages.isEmpty()) {
+				Message o = messages.poll();
+				int id = o.id;
+				Sensor S = sensors.get(id);
+				int sX = S.getX();
+				int sY = S.getY();
 
-			double distance = 9999.0d;
-			Charger selectedCharger = null;
+				double distance = 9999.0d;
+				Charger selectedCharger = null;
 
-			for(Map.Entry<Integer, Charger> set: chargers.entrySet()) {
-				Charger C = set.getValue();
-				int cX = C.getX();
-				int cY = C.getY();
-				double calcD = Math.sqrt(Math.pow((sX-cX), 2) + Math.pow((sY-cY), 2));
-				if(calcD < distance) {
-					distance = calcD;
-					selectedCharger = C;
+				for(Map.Entry<Integer, Charger> set: chargers.entrySet()) {
+					Charger C = set.getValue();
+					int cX = C.getX();
+					int cY = C.getY();
+					double calcD = Math.sqrt(Math.pow((sX-cX), 2) + Math.pow((sY-cY), 2));
+					if(calcD < distance) {
+						distance = calcD;
+						selectedCharger = C;
+					}
+				}
+
+				if(selectedCharger != null) {
+					selectedCharger.addSensor(distance, S, o);
 				}
 			}
-
-			if(selectedCharger != null) {
-				selectedCharger.addSensor(distance, S);
+			try {
+				Thread.sleep(2000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
 			}
+			
 		}
 	}
 	

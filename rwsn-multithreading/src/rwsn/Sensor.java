@@ -20,7 +20,7 @@ public class Sensor extends Thread implements DisplayObject {
 	private SensorTypes type;
 	private BaseStation bs;
 	private double energyDepletionRate;
-	private double remainingEnergy;
+	public double remainingEnergy;
 	
 	public Sensor(int x, int y, int id, SensorTypes type, BaseStation bs) {
 		this.x=x;
@@ -54,6 +54,10 @@ public class Sensor extends Thread implements DisplayObject {
 	@Override
 	public void run() {
 		while(true) {
+			if(remainingEnergy > 0) {
+				live = true;
+				chargingRequestSend = false;
+			}
 			if(live) {
 				sendData();
 				remainingEnergy -= energyDepletionRate;
