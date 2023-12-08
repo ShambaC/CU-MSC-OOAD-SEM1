@@ -10,6 +10,7 @@ import java.util.Comparator;
 
 import javax.swing.ImageIcon;
 
+// class to store distance to sensor and its message
 class lowChargeSensor {
 	double distance;
 	Sensor S;
@@ -21,6 +22,7 @@ class lowChargeSensor {
 	}
 }
 
+// comparator function for the above class
 class lcsComparator implements Comparator<lowChargeSensor> {
 	@Override
 	public int compare(lowChargeSensor S1, lowChargeSensor S2) {
@@ -68,6 +70,7 @@ public class Charger extends Thread implements DisplayObject {
 		return y;
 	}
 
+	// add a low energy sensor to the priority queue
 	public void addSensor(double distance, Sensor S, Message M) {
 		lowChargeSensor lcS = new lowChargeSensor(distance, S, M);
 		lcSensorList.add(lcS);
@@ -77,19 +80,21 @@ public class Charger extends Thread implements DisplayObject {
 	@Override
 	public void run() {
 		while(true) {
-			synchronized(lcSensorList) {
 				if(!lcSensorList.isEmpty() && !this.isCharging) {
+					// Get the nearest Sensor
 					lowChargeSensor lcS = lcSensorList.poll();
 					messages.remove(lcS.M);
-					Sensor S = lcs.S;
+					Sensor S = lcS.S;
 
+					// Calculate the charge needed
 					double chargeNeeded = Parameters.InitialEnergy - S.remainingEnergy;
 
+					// Calculate the time needed for the charger to go and charge the sensor
 					double timeNeeded = lcS.distance / this.speed;
 					this.isCharging = true;
 					try {
 						System.out.println("Charger " + this.id + " travelling towards Sensor " + S.getID() + " in time " + timeNeeded);
-						Thread.sleep(timeNeeded * 1000);
+						Thread.sleep((int) timeNeeded * 1000);
 					}
 					catch(InterruptedException e) {
 						e.printStackTrace();
@@ -105,7 +110,6 @@ public class Charger extends Thread implements DisplayObject {
 					this.isCharging = false;
 				}
 			}
-		}
 	}
 	
 	@Override
@@ -119,7 +123,7 @@ public class Charger extends Thread implements DisplayObject {
 		}
 		msg+="]";
 		g.drawString(msg, x, y+5);
-		g.drawString(id+","+String.format("%.2f",remainingEnergy), x, y+10);
+		g.drawString(id+","+String.format("%.2f",remainingEnergy), x, y-5);
 	}
 
 }

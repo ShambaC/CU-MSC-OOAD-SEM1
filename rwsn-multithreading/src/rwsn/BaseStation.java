@@ -71,11 +71,11 @@ public class BaseStation extends Thread implements DisplayObject {
 					selectedCharger.addSensor(distance, S, o);
 				}
 			}
-			try {
-				Thread.sleep(2000);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
+			// try {
+			// 	Thread.sleep(2000);
+			// } catch (InterruptedException e) {
+			// 	e.printStackTrace();
+			// }
 			
 		}
 	}

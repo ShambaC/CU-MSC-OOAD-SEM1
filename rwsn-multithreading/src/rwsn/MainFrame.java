@@ -25,6 +25,7 @@ public class MainFrame extends JFrame{
 		Dimension d = Toolkit.getDefaultToolkit().getScreenSize();
 		BaseStation bs = new BaseStation((int)((d.getWidth()-20)/2),(int)(d.getHeight()/2));
 		canvas.setBaseStation(bs);
+		JOptionPane.showMessageDialog(this, "Be careful not to add sensors and chargers more than your system's number of threads !", "Alert", JOptionPane.WARNING_MESSAGE);
 		int ns = Integer.parseInt(JOptionPane.showInputDialog("How Many Sensors?"));
 		int nc = Integer.parseInt(JOptionPane.showInputDialog("How Many Chargers?"));
 		d.setSize(new Dimension((int)d.getWidth()-100,(int)d.getHeight()-100));
