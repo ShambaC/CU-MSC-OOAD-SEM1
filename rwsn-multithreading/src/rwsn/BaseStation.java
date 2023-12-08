@@ -10,11 +10,6 @@ import java.util.Queue;
 
 import javax.swing.ImageIcon;
 
-/**
- * 
- * @author Sunirmal Khatua
- *
- */
 public class BaseStation extends Thread implements DisplayObject {
 
 	private Image img;
@@ -70,7 +65,7 @@ public class BaseStation extends Thread implements DisplayObject {
 
 				synchronized(selectedCharger) {
 					if(selectedCharger != null) {
-						selectedCharger.addSensor(distance, S, o);
+						selectedCharger.addSensor(distance, S);
 					}
 				}
 			}
