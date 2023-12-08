@@ -25,12 +25,14 @@ public class BaseStation extends Thread implements DisplayObject {
 		start();
 	}
 	
+	// Synchronized method to recieve data from sensor
 	public synchronized void receiveMessage(Message msg) {
 		if(msg.type==MessageTypes.RECHARGE) {
 			messages.add(msg);
 		}
 	}
 	
+	// Methods to return coords of BaseStation
 	public int getX() {
 		return x;
 	}
@@ -43,26 +45,36 @@ public class BaseStation extends Thread implements DisplayObject {
 	public void run() {
 		while(true) {
 			if(!messages.isEmpty()) {
+				// Get the message at the front of the queue
 				Message o = messages.poll();
 				int id = o.id;
+				// Get the Sensor object that sent the message
 				Sensor S = sensors.get(id);
+				// Save its coords
 				int sX = S.getX();
 				int sY = S.getY();
 
 				double distance = 9999.0d;
 				Charger selectedCharger = null;
 
+				// FInd the nearest charger to assign the sensor to
 				for(Map.Entry<Integer, Charger> set: chargers.entrySet()) {
 					Charger C = set.getValue();
 					int cX = C.getX();
 					int cY = C.getY();
+
+					// Calculate distance from charger to sensor
 					double calcD = Math.sqrt(Math.pow((sX-cX), 2) + Math.pow((sY-cY), 2));
 					if(calcD < distance) {
+						if(C.remainingEnergy <= 0) {
+							continue;
+						}
 						distance = calcD;
 						selectedCharger = C;
 					}
 				}
 
+				// Add sensor to the selected charger
 				synchronized(selectedCharger) {
 					if(selectedCharger != null) {
 						selectedCharger.addSensor(distance, S);

@@ -39,8 +39,8 @@ class lcsComparator implements Comparator<lowChargeSensor> {
 
 public class Charger extends Thread implements DisplayObject {
 	private Image img;
-	private int id, x,y;
-	private double remainingEnergy;
+	private int id, x, y, tX, tY;
+	public double remainingEnergy;
 	private int speed;
 	private BaseStation bs;
 	private List<Sensor> sensorsAssigned = new ArrayList<Sensor>();
@@ -52,6 +52,8 @@ public class Charger extends Thread implements DisplayObject {
 		this.id=id;
 		this.x=x;
 		this.y=y;
+		this.tX = x;
+		this.tY = y;
 		this.bs=bs;
 		this.speed = (int)(Math.random()*20)+1;
 		remainingEnergy = Parameters.InitialEnergy * 2;
@@ -93,6 +95,8 @@ public class Charger extends Thread implements DisplayObject {
 					// Calculate the time needed for the charger to go and charge the sensor
 					double timeNeeded = lcS.distance / this.speed;
 					this.isCharging = true;
+
+					// Start charging
 					try {
 						System.out.println("Charger " + this.id + " travelling towards Sensor " + S.getID() + " in time " + timeNeeded);
 						sX = S.getX();
@@ -120,10 +124,31 @@ public class Charger extends Thread implements DisplayObject {
 				}
 			}
 	}
-	
+
 	@Override
 	public void draw(Graphics2D g) {
-		g.drawImage(img,x,y,30,30,null);
+		if(isCharging) {
+			if(tX < sX) {
+				tX += speed;
+			}
+			else if(tX > sX) {
+				tX -= speed;
+			}
+
+			if(tY < sY) {
+				tY += speed;
+			}
+			else if(tY > sY) {
+				tY -= speed;
+			}
+
+			g.drawImage(img, tX, tY, 30, 30, null);
+		}
+		else {
+			tX = x;
+			tY = y;
+			g.drawImage(img,x,y,30,30,null);
+		}
 		String msg = "[";
 		Iterator<Sensor> it = sensorsAssigned.iterator();
 		while (it.hasNext()) {

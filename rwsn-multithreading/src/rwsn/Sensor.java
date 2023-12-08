@@ -59,14 +59,16 @@ public class Sensor extends Thread implements DisplayObject {
 			if(live) {
 				sendData();
 				remainingEnergy -= energyDepletionRate;
-				if(remainingEnergy<=0) {
+				if(remainingEnergy<0) {
 					remainingEnergy=0;
-					live = false;
 				}
 				if(remainingEnergy<Parameters.ThresholdEnergy && !chargingRequestSend) {
 					Message<Double> msg = new Message<Double>(id, MessageTypes.RECHARGE, remainingEnergy);
 					bs.receiveMessage(msg);
 					chargingRequestSend=true;
+				}
+				else if(remainingEnergy == 0) {
+					live = false;
 				}
 			}
 			try {
