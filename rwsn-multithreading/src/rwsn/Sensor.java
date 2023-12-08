@@ -3,6 +3,7 @@ package rwsn;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Image;
+import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 
 import javax.swing.ImageIcon;
@@ -51,6 +52,8 @@ public class Sensor extends Thread implements DisplayObject {
 		while(true) {
 			if(remainingEnergy > 0) {
 				live = true;
+			}
+			if(remainingEnergy > Parameters.ThresholdEnergy) {
 				chargingRequestSend = false;
 			}
 			if(live) {

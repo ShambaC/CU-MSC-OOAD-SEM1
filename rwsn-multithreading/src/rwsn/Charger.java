@@ -47,14 +47,14 @@ public class Charger extends Thread implements DisplayObject {
 	private List<Message> messages = new ArrayList<Message>();
 	private boolean isCharging = false;
 	
-	PriorityQueue<lowChargeSensor> lcSensorList = new PriorityQueue<lowChargeSensor>();
+	PriorityQueue<lowChargeSensor> lcSensorList = new PriorityQueue<lowChargeSensor>(new lcsComparator());
 
 	public Charger(int id, int x, int y, BaseStation bs) {
 		this.id=id;
 		this.x=x;
 		this.y=y;
 		this.bs=bs;
-		this.speed = (int)(Math.random()*10)+1;
+		this.speed = (int)(Math.random()*20)+1;
 		remainingEnergy = Parameters.InitialEnergy * 2;
 		img = new ImageIcon(getClass().getResource("/images/charger.png")).getImage();
 		start();
@@ -71,7 +71,7 @@ public class Charger extends Thread implements DisplayObject {
 	}
 
 	// add a low energy sensor to the priority queue
-	public void addSensor(double distance, Sensor S, Message M) {
+	public synchronized void addSensor(double distance, Sensor S, Message M) {
 		lowChargeSensor lcS = new lowChargeSensor(distance, S, M);
 		lcSensorList.add(lcS);
 		messages.add(M);
@@ -83,7 +83,8 @@ public class Charger extends Thread implements DisplayObject {
 				if(!lcSensorList.isEmpty() && !this.isCharging) {
 					// Get the nearest Sensor
 					lowChargeSensor lcS = lcSensorList.poll();
-					messages.remove(lcS.M);
+					boolean res = messages.remove(lcS.M);
+					System.err.println(res);
 					Sensor S = lcS.S;
 
 					// Calculate the charge needed
@@ -109,6 +110,12 @@ public class Charger extends Thread implements DisplayObject {
 					}
 					this.isCharging = false;
 				}
+				try {
+					Thread.sleep(2000);
+				}
+				catch(InterruptedException e) {
+					e.printStackTrace();
+				}
 			}
 	}
 	
@@ -119,10 +126,10 @@ public class Charger extends Thread implements DisplayObject {
 		Iterator<Message> it = messages.iterator();
 		while (it.hasNext()) {
 			Message m = it.next();
-			msg=msg+m.id;
+			msg=msg+m.id+",";
 		}
 		msg+="]";
-		g.drawString(msg, x, y+5);
+		g.drawString(msg, x, y-20);
 		g.drawString(id+","+String.format("%.2f",remainingEnergy), x, y-5);
 	}
 

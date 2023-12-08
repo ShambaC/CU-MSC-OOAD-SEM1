@@ -27,6 +27,7 @@ public class BaseStation extends Thread implements DisplayObject {
 		this.x=x;
 		this.y=y;
 		img = new ImageIcon(getClass().getResource("/images/bs.png")).getImage();
+		start();
 	}
 	
 	public synchronized void receiveMessage(Message msg) {
@@ -67,15 +68,17 @@ public class BaseStation extends Thread implements DisplayObject {
 					}
 				}
 
-				if(selectedCharger != null) {
-					selectedCharger.addSensor(distance, S, o);
+				synchronized(selectedCharger) {
+					if(selectedCharger != null) {
+						selectedCharger.addSensor(distance, S, o);
+					}
 				}
 			}
-			// try {
-			// 	Thread.sleep(2000);
-			// } catch (InterruptedException e) {
-			// 	e.printStackTrace();
-			// }
+			try {
+				Thread.sleep(2000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 			
 		}
 	}
