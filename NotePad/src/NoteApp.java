@@ -1,14 +1,13 @@
 import java.io.*;
 import java.nio.*;
+import java.io.FileReader;
+import java.nio.file.Files;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
-import java.io.FileReader;
-import java.nio.file.Files;
 
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -22,8 +21,12 @@ import javax.swing.JTextArea;
 import javax.swing.UIManager;
 
 public class NoteApp extends JFrame implements ActionListener {
-    JTextArea tArea;
 
+    // GLobals
+    JTextArea tArea;
+    JMenuItem lwrapIt;
+
+    // Main Window
     public NoteApp() {
         setTitle("Untitled");
         setSize(640, 480);
@@ -37,6 +40,7 @@ public class NoteApp extends JFrame implements ActionListener {
         UIManager.put("MenuBar.background", Color.DARK_GRAY);
         JMenuBar mb = new JMenuBar();
 
+        // Top level menu bar options
         UIManager.put("Menu.background", Color.DARK_GRAY);
         UIManager.put("Menu.foreground", Color.WHITE);
         UIManager.put("Menu.opaque", true);
@@ -44,12 +48,16 @@ public class NoteApp extends JFrame implements ActionListener {
         JMenu edit = new JMenu("Edit");
         JMenu format = new JMenu("Format");
 
+        // Nested menu items
         UIManager.put("MenuItem.background", Color.DARK_GRAY);
         UIManager.put("MenuItem.foreground", Color.WHITE);
+        // Under File menu
         JMenuItem newIt = new JMenuItem("New");
         JMenuItem openIt = new JMenuItem("Open");
         JMenuItem saveIt = new JMenuItem("Save");
         JMenuItem exitIt = new JMenuItem("Exit");
+        // Under Format menu
+        lwrapIt = new JMenuItem("Line Wrap");
 
         // Add listener
         newIt.addActionListener(this);
@@ -57,10 +65,14 @@ public class NoteApp extends JFrame implements ActionListener {
         saveIt.addActionListener(this);
         exitIt.addActionListener(this);
 
+        lwrapIt.addActionListener(this);
+
         file.add(newIt);
         file.add(openIt);
         file.add(saveIt);
         file.add(exitIt);
+
+        format.add(lwrapIt);
 
         mb.add(file);
         mb.add(edit);
@@ -123,6 +135,16 @@ public class NoteApp extends JFrame implements ActionListener {
         }
         else if(cmd.equalsIgnoreCase("Exit")) {
             System.exit(0);
+        }
+        else if(cmd.equalsIgnoreCase("Line Wrap") || cmd.equalsIgnoreCase("Line Wrap    ✔")) {
+            if(tArea.getLineWrap()) {
+                tArea.setLineWrap(false);
+                lwrapIt.setText("Line Wrap");
+            }
+            else {
+                tArea.setLineWrap(true);
+                lwrapIt.setText("Line Wrap    ✔");
+            }
         }
     }
 
