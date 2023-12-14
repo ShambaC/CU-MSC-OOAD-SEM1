@@ -6,6 +6,7 @@ import java.awt.Color;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+
 import java.io.FileReader;
 import java.nio.file.Files;
 
@@ -41,6 +42,7 @@ public class NoteApp extends JFrame implements ActionListener {
         UIManager.put("Menu.opaque", true);
         JMenu file = new JMenu("File");
         JMenu edit = new JMenu("Edit");
+        JMenu format = new JMenu("Format");
 
         UIManager.put("MenuItem.background", Color.DARK_GRAY);
         UIManager.put("MenuItem.foreground", Color.WHITE);
@@ -62,6 +64,7 @@ public class NoteApp extends JFrame implements ActionListener {
 
         mb.add(file);
         mb.add(edit);
+        mb.add(format);
         add(mb, BorderLayout.NORTH);
 
         tArea = new JTextArea();
@@ -80,6 +83,7 @@ public class NoteApp extends JFrame implements ActionListener {
 
         if(cmd.equalsIgnoreCase("New")) {
             tArea.setText("");
+            setTitle("Untitled");
         }
         else if(cmd.equalsIgnoreCase("Open")) {
             JFileChooser fc = new JFileChooser();
@@ -102,7 +106,20 @@ public class NoteApp extends JFrame implements ActionListener {
         }
         else if(cmd.equalsIgnoreCase("Save")) {
             JFileChooser fc = new JFileChooser();
-            fc.showSaveDialog(this);
+            int res = fc.showSaveDialog(this);
+            if(res == JFileChooser.APPROVE_OPTION) {
+                try {
+                    String content = tArea.getText();
+                    Files.write(fc.getSelectedFile().toPath(), content.getBytes());
+                    setTitle(fc.getSelectedFile().getName());
+                }
+                catch (IOException err) {
+                    err.printStackTrace();
+                }
+            }
+            else if(res == JFileChooser.ERROR_OPTION) {
+                JOptionPane.showMessageDialog(this, "Error", "Some error occured", JOptionPane.ERROR_MESSAGE);
+            }
         }
         else if(cmd.equalsIgnoreCase("Exit")) {
             System.exit(0);
