@@ -7,10 +7,13 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import javax.swing.BorderFactory;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -23,40 +26,91 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.UIManager;
+import javax.swing.border.Border;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
 // class for font settings window
 class FontWindow extends JFrame implements ActionListener {
-    int fontSize;
-    String fontFace;
+    private Font font, tempFont;
 
-    public FontWindow(int fontSize, String fontFace) {
+    JTextField sizeField;
+    JLabel sampleText;
+
+    public FontWindow(Font font) {
         setTitle("Font Settings");
         setSize(500, 400);
         setBackground(Color.DARK_GRAY);
         setForeground(Color.WHITE);
         setDefaultCloseOperation(HIDE_ON_CLOSE);
-        this.fontSize = fontSize;
-        this.fontFace = fontFace;
+        this.font = font;
         initCmp();
     }
 
     private void initCmp() {
-        JPanel mainPanel = new JPanel();
+        GridBagLayout gb = new GridBagLayout();
+        JPanel mainPanel = new JPanel(gb);
+        GridBagConstraints gbc = new GridBagConstraints();
         setLayout(new FlowLayout());
 
+        gbc.weightx = 1;
+        gbc.fill = GridBagConstraints.BOTH;
         JLabel sizeLabel = new JLabel("Size: ");
-        JTextField sizeField = new JTextField(3);
-        sizeField.setText(Integer.toString(fontSize));
+        gb.setConstraints(sizeLabel, gbc);
+        gbc.gridwidth = GridBagConstraints.REMAINDER;
+        sizeField = new JTextField(3);
+        sizeField.setText(Integer.toString(font.getSize()));
+        gb.setConstraints(sizeField, gbc);
+
+        gbc.weightx = 0;
+        sampleText = new JLabel("Aa Bb Cc Sample TEXT");
+        gb.setConstraints(sampleText, gbc);
+        Border blackLine = BorderFactory.createLineBorder(Color.BLACK);
+        sampleText.setBorder(blackLine);
+
+        sizeField.getDocument().addDocumentListener(new DocumentListener() {
+            public void changedUpdate(DocumentEvent arg0) {
+
+            }
+            public void insertUpdate(DocumentEvent arg0) {
+                int sizeToSet;
+                if(sizeField.getText().equalsIgnoreCase("")) {
+                    sizeToSet = 1;
+                }
+                else {
+                    sizeToSet = Integer.parseInt(sizeField.getText());
+                }                
+                tempFont = new Font(font.getName(), font.getStyle(), sizeToSet);
+                sampleText.setFont(tempFont);
+            }
+            public void removeUpdate(DocumentEvent arg0) {
+                int sizeToSet;
+                if(sizeField.getText().equalsIgnoreCase("")) {
+                    sizeToSet = 1;
+                }
+                else {
+                    sizeToSet = Integer.parseInt(sizeField.getText());
+                } 
+                tempFont = new Font(font.getName(), font.getStyle(), sizeToSet);
+                sampleText.setFont(tempFont);
+            }
+        });
 
         mainPanel.add(sizeLabel);
         mainPanel.add(sizeField);
+        mainPanel.add(sampleText);
 
         add(mainPanel);
+    }
+
+    public Font getFont() {
+        return font;
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
         String cmd = e.getActionCommand();
+        
     }
 }
 
@@ -76,7 +130,7 @@ public class NoteApp extends JFrame implements ActionListener {
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         initCmp();
         Font font = tArea.getFont();
-        fw = new FontWindow(font.getSize(), font.getName());
+        fw = new FontWindow(font);
     }
 
     private void initCmp() {
