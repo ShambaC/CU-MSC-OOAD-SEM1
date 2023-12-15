@@ -14,6 +14,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.BorderFactory;
+import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -34,8 +35,6 @@ import javax.swing.event.DocumentListener;
 class FontWindow extends JFrame implements ActionListener {
     private Font font, tempFont;
 
-    JTextField sizeField;
-    JLabel sampleText;
 
     public FontWindow(Font font) {
         setTitle("Font Settings");
@@ -58,12 +57,30 @@ class FontWindow extends JFrame implements ActionListener {
         JLabel sizeLabel = new JLabel("Size: ");
         gb.setConstraints(sizeLabel, gbc);
         gbc.gridwidth = GridBagConstraints.REMAINDER;
-        sizeField = new JTextField(3);
+        JTextField sizeField = new JTextField(3);
         sizeField.setText(Integer.toString(font.getSize()));
         gb.setConstraints(sizeField, gbc);
 
+        String fontList[] = {"Helvetica", "Verdana", "Times New Roman", "Comic Sans MS"};
+
+        // Font fontList[] = {
+        //     new Font("Helvetica", font.getStyle(), font.getSize()),
+        //     new Font("Verdana", font.getStyle(), font.getSize()),
+        //     new Font("Times New Roman", font.getStyle(), font.getSize()),
+        //     new Font("Comic Sans MS", font.getStyle(), font.getSize())
+        // };
+
+        gbc.weightx = 1;
+        gbc.gridwidth = 1;
+        JLabel faceLabel = new JLabel("Font: ");
+        gb.setConstraints(faceLabel, gbc);
+        gbc.gridwidth = GridBagConstraints.REMAINDER;
+        JComboBox faceDropDown = new JComboBox(fontList);
+        gb.setConstraints(faceDropDown, gbc);
+
+
         gbc.weightx = 0;
-        sampleText = new JLabel("Aa Bb Cc Sample TEXT");
+        JLabel sampleText = new JLabel("Aa Bb Cc Sample TEXT");
         gb.setConstraints(sampleText, gbc);
         Border blackLine = BorderFactory.createLineBorder(Color.BLACK);
         sampleText.setBorder(blackLine);
@@ -96,8 +113,17 @@ class FontWindow extends JFrame implements ActionListener {
             }
         });
 
+        faceDropDown.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                
+            }
+        });
+
         mainPanel.add(sizeLabel);
         mainPanel.add(sizeField);
+        mainPanel.add(faceLabel);
+        mainPanel.add(faceDropDown);
         mainPanel.add(sampleText);
 
         add(mainPanel);
@@ -105,6 +131,10 @@ class FontWindow extends JFrame implements ActionListener {
 
     public Font getFont() {
         return font;
+    }
+
+    public void setFont(Font font) {
+        this.font = font;
     }
 
     @Override
@@ -184,6 +214,7 @@ public class NoteApp extends JFrame implements ActionListener {
         tArea.setForeground(new Color(245, 245, 245));
         tArea.setMargin(new Insets(5, 10, 10, 0));
         tArea.setCaretColor(Color.WHITE);
+        tArea.setFont(new Font("Helvetica", Font.PLAIN, 12));
 
         JScrollPane scroll = new JScrollPane(tArea, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         add(scroll);
