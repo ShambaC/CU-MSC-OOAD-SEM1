@@ -14,6 +14,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.BorderFactory;
+import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -35,6 +36,9 @@ import javax.swing.event.DocumentListener;
 class FontWindow extends JFrame implements ActionListener {
     private Font font, tempFont;
 
+    JTextField sizeField;
+    JComboBox faceDropDown;
+    JLabel sampleText;
 
     public FontWindow(Font font) {
         setTitle("Font Settings");
@@ -43,6 +47,7 @@ class FontWindow extends JFrame implements ActionListener {
         setForeground(Color.WHITE);
         setDefaultCloseOperation(HIDE_ON_CLOSE);
         this.font = font;
+        this.tempFont = font;
         initCmp();
     }
 
@@ -57,33 +62,34 @@ class FontWindow extends JFrame implements ActionListener {
         JLabel sizeLabel = new JLabel("Size: ");
         gb.setConstraints(sizeLabel, gbc);
         gbc.gridwidth = GridBagConstraints.REMAINDER;
-        JTextField sizeField = new JTextField(3);
+        sizeField = new JTextField(3);
         sizeField.setText(Integer.toString(font.getSize()));
         gb.setConstraints(sizeField, gbc);
 
         String fontList[] = {"Helvetica", "Verdana", "Times New Roman", "Comic Sans MS"};
-
-        // Font fontList[] = {
-        //     new Font("Helvetica", font.getStyle(), font.getSize()),
-        //     new Font("Verdana", font.getStyle(), font.getSize()),
-        //     new Font("Times New Roman", font.getStyle(), font.getSize()),
-        //     new Font("Comic Sans MS", font.getStyle(), font.getSize())
-        // };
 
         gbc.weightx = 1;
         gbc.gridwidth = 1;
         JLabel faceLabel = new JLabel("Font: ");
         gb.setConstraints(faceLabel, gbc);
         gbc.gridwidth = GridBagConstraints.REMAINDER;
-        JComboBox faceDropDown = new JComboBox(fontList);
+        faceDropDown = new JComboBox(fontList);
         gb.setConstraints(faceDropDown, gbc);
 
 
         gbc.weightx = 0;
-        JLabel sampleText = new JLabel("Aa Bb Cc Sample TEXT");
+        sampleText = new JLabel("Aa Bb Cc Sample TEXT");
         gb.setConstraints(sampleText, gbc);
         Border blackLine = BorderFactory.createLineBorder(Color.BLACK);
         sampleText.setBorder(blackLine);
+
+        gbc.weightx = 1;
+        gbc.gridwidth = 1;
+        JButton applyBtn = new JButton("Apply");
+        gb.setConstraints(applyBtn, gbc);
+        gbc.gridwidth = GridBagConstraints.REMAINDER;
+        JButton cancelBtn = new JButton("Cancel");
+        gb.setConstraints(cancelBtn, gbc);
 
         sizeField.getDocument().addDocumentListener(new DocumentListener() {
             public void changedUpdate(DocumentEvent arg0) {
@@ -116,15 +122,22 @@ class FontWindow extends JFrame implements ActionListener {
         faceDropDown.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                
+                String chosenFont = (String) faceDropDown.getSelectedItem();
+                tempFont = new Font(chosenFont, font.getStyle(), tempFont.getSize());
+                sampleText.setFont(tempFont);
             }
         });
+
+        applyBtn.addActionListener(this);
+        cancelBtn.addActionListener(this);
 
         mainPanel.add(sizeLabel);
         mainPanel.add(sizeField);
         mainPanel.add(faceLabel);
         mainPanel.add(faceDropDown);
         mainPanel.add(sampleText);
+        mainPanel.add(applyBtn);
+        mainPanel.add(cancelBtn);
 
         add(mainPanel);
     }
@@ -133,14 +146,19 @@ class FontWindow extends JFrame implements ActionListener {
         return font;
     }
 
-    public void setFont(Font font) {
-        this.font = font;
-    }
-
     @Override
     public void actionPerformed(ActionEvent e) {
         String cmd = e.getActionCommand();
         
+        if(cmd.equalsIgnoreCase("Apply")) {
+            font = tempFont;
+        }
+        else if(cmd.equalsIgnoreCase("Cancel")) {
+            this.setVisible(false);
+            sizeField.setText(Integer.toString(font.getSize()));
+            faceDropDown.setSelectedItem(font.getFamily()); //doesnt work, too lazy to implement the roundabout fix
+            sampleText.setFont(font);
+        }
     }
 }
 
@@ -267,6 +285,9 @@ public class NoteApp extends JFrame implements ActionListener {
         else if(cmd.equalsIgnoreCase("Exit")) {
             System.exit(0);
         }
+        else if(cmd.equalsIgnoreCase("Font")) {
+            fw.setVisible(true);
+        }
         else if(cmd.equalsIgnoreCase("Line Wrap") || cmd.equalsIgnoreCase("Line Wrap    ✔")) {
             if(tArea.getLineWrap()) {
                 tArea.setLineWrap(false);
@@ -276,9 +297,6 @@ public class NoteApp extends JFrame implements ActionListener {
                 tArea.setLineWrap(true);
                 lwrapIt.setText("Line Wrap    ✔");
             }
-        }
-        else if(cmd.equalsIgnoreCase("Font")) {
-            fw.setVisible(true);
         }
     }
 
