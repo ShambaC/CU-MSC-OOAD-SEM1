@@ -1,6 +1,5 @@
 # Build files
 *.class
 
-# binaries
-*.exe
-*.msi
+# binaries folder
+*/build
