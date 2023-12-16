@@ -195,6 +195,7 @@ public class NoteApp extends JFrame implements ActionListener {
         JMenu file = new JMenu("File");
         JMenu edit = new JMenu("Edit");
         JMenu format = new JMenu("Format");
+        JMenu help = new JMenu("Help");
 
         // Nested menu items
         UIManager.put("MenuItem.background", Color.DARK_GRAY);
@@ -207,6 +208,9 @@ public class NoteApp extends JFrame implements ActionListener {
         // Under Format menu
         JMenuItem font = new JMenuItem("Font");
         lwrapIt = new JMenuItem("Line Wrap");
+        // Under help menu
+        JMenuItem helpIt = new JMenuItem("Help");   // Wont implement
+        JMenuItem aboutIt = new JMenuItem("About");
 
         // Add listener
         newIt.addActionListener(this);
@@ -217,6 +221,8 @@ public class NoteApp extends JFrame implements ActionListener {
         font.addActionListener(this);
         lwrapIt.addActionListener(this);
 
+        aboutIt.addActionListener(this);
+
         file.add(newIt);
         file.add(openIt);
         file.add(saveIt);
@@ -225,9 +231,13 @@ public class NoteApp extends JFrame implements ActionListener {
         format.add(font);
         format.add(lwrapIt);
 
+        help.add(helpIt);
+        help.add(aboutIt);
+
         mb.add(file);
         mb.add(edit);
         mb.add(format);
+        mb.add(help);
         add(mb, BorderLayout.NORTH);
 
         tArea = new JTextArea();
@@ -307,6 +317,9 @@ public class NoteApp extends JFrame implements ActionListener {
                 tArea.setLineWrap(true);
                 lwrapIt.setText("Line Wrap    ✔");
             }
+        }
+        else if(cmd.equalsIgnoreCase("About")) {
+            JOptionPane.showMessageDialog(this, "NoteApp v1.0.0\nMade by ShambaC", "About", JOptionPane.INFORMATION_MESSAGE);
         }
     }
 
