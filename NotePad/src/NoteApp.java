@@ -12,6 +12,8 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -103,7 +105,7 @@ class FontWindow extends JFrame implements ActionListener {
                 else {
                     sizeToSet = Integer.parseInt(sizeField.getText());
                 }                
-                tempFont = new Font(font.getName(), font.getStyle(), sizeToSet);
+                tempFont = new Font(tempFont.getName(), font.getStyle(), sizeToSet);
                 sampleText.setFont(tempFont);
             }
             public void removeUpdate(DocumentEvent arg0) {
@@ -114,7 +116,7 @@ class FontWindow extends JFrame implements ActionListener {
                 else {
                     sizeToSet = Integer.parseInt(sizeField.getText());
                 } 
-                tempFont = new Font(font.getName(), font.getStyle(), sizeToSet);
+                tempFont = new Font(tempFont.getName(), font.getStyle(), sizeToSet);
                 sampleText.setFont(tempFont);
             }
         });
@@ -152,6 +154,8 @@ class FontWindow extends JFrame implements ActionListener {
         
         if(cmd.equalsIgnoreCase("Apply")) {
             font = tempFont;
+            this.dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
+            this.setVisible(false);
         }
         else if(cmd.equalsIgnoreCase("Cancel")) {
             this.setVisible(false);
@@ -176,9 +180,8 @@ public class NoteApp extends JFrame implements ActionListener {
         setBackground(Color.DARK_GRAY);
         setForeground(Color.WHITE);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
+        fw = new FontWindow(new Font("Helvetica", Font.PLAIN, 12));
         initCmp();
-        Font font = tArea.getFont();
-        fw = new FontWindow(font);
     }
 
     private void initCmp() {
@@ -236,6 +239,13 @@ public class NoteApp extends JFrame implements ActionListener {
 
         JScrollPane scroll = new JScrollPane(tArea, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         add(scroll);
+
+        fw.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                tArea.setFont(fw.getFont());
+            }
+        });
     }
 
     @Override
