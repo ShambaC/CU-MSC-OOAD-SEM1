@@ -1,2 +1,6 @@
 # Build files
 *.class
+
+# binaries
+*.exe
+*.msi
