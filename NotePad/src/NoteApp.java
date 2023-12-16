@@ -33,6 +33,7 @@ import javax.swing.UIManager;
 import javax.swing.border.Border;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.text.DefaultEditorKit;
 
 // class for font settings window
 class FontWindow extends JFrame implements ActionListener {
@@ -160,7 +161,12 @@ class FontWindow extends JFrame implements ActionListener {
         else if(cmd.equalsIgnoreCase("Cancel")) {
             this.setVisible(false);
             sizeField.setText(Integer.toString(font.getSize()));
-            faceDropDown.setSelectedItem(font.getFamily()); //doesnt work, too lazy to implement the roundabout fix
+            if(font.getFamily().equalsIgnoreCase("dialog")) {
+                faceDropDown.setSelectedItem("Helvetica");
+            }
+            else {
+                faceDropDown.setSelectedItem(font.getFamily());
+            }
             sampleText.setFont(font);
         }
     }
@@ -205,6 +211,10 @@ public class NoteApp extends JFrame implements ActionListener {
         JMenuItem openIt = new JMenuItem("Open");
         JMenuItem saveIt = new JMenuItem("Save");
         JMenuItem exitIt = new JMenuItem("Exit");
+        // Under edit menu
+        JMenuItem copyIt = new JMenuItem(new DefaultEditorKit.CopyAction());
+        JMenuItem cutIt = new JMenuItem(new DefaultEditorKit.CutAction());
+        JMenuItem pasteIt = new JMenuItem(new DefaultEditorKit.PasteAction());
         // Under Format menu
         JMenuItem font = new JMenuItem("Font");
         lwrapIt = new JMenuItem("Line Wrap");
@@ -227,6 +237,10 @@ public class NoteApp extends JFrame implements ActionListener {
         file.add(openIt);
         file.add(saveIt);
         file.add(exitIt);
+
+        edit.add(copyIt);
+        edit.add(cutIt);
+        edit.add(pasteIt);
         
         format.add(font);
         format.add(lwrapIt);
