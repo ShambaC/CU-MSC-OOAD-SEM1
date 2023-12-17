@@ -129,4 +129,12 @@ public class DrawCanvas extends JComponent implements MouseListener, MouseMotion
             err.printStackTrace();
         }
     }
+
+    public void setPaintColor(Color color) {
+        drawColor = color;
+    }
+
+    public Color getPaintColor() {
+        return drawColor;
+    }
 }

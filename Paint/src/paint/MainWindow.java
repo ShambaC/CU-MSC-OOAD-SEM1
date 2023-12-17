@@ -6,18 +6,26 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.lang.reflect.Field;
 
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JColorChooser;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.UIManager;
 
 public class MainWindow extends JFrame implements ActionListener {
     DrawCanvas dc;
+
+    JButton brushButton, gradButton;
     
     public MainWindow() {
         setTitle("Untitled");
@@ -28,7 +36,7 @@ public class MainWindow extends JFrame implements ActionListener {
     }
 
     private void initCmp() {
-        // setLayout(new FlowLayout());
+        // setLayout(new FlowLayout(FlowLayout.LEFT));
         JMenuBar mb = new JMenuBar();        
         mb.setBackground(Color.DARK_GRAY);
 
@@ -59,13 +67,69 @@ public class MainWindow extends JFrame implements ActionListener {
 
         mb.add(file);
 
-        add(mb, BorderLayout.NORTH);
+        // Color menu
+        ActionListener colorListener = new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String cmd = e.getActionCommand();
+                if(cmd.equalsIgnoreCase("BLACK")) { dc.setPaintColor(Color.BLACK); }
+                else if(cmd.equalsIgnoreCase("BLUE")) { dc.setPaintColor(Color.BLUE); }
+                else if(cmd.equalsIgnoreCase("GREEN")) { dc.setPaintColor(Color.GREEN); }
+                else if(cmd.equalsIgnoreCase("ORANGE")) { dc.setPaintColor(Color.ORANGE); }
+            }
+        };
+
+        JButton blackBtn = new JButton("BLACK");
+        blackBtn.setBackground(Color.BLACK);
+        blackBtn.setPreferredSize(new Dimension(40, 40));
+        blackBtn.addActionListener(colorListener);
+        
+        JButton blueBtn = new JButton("BLUE");
+        blueBtn.setBackground(Color.BLUE);
+        blueBtn.setForeground(Color.BLUE);
+        blueBtn.setPreferredSize(new Dimension(40, 40));
+        blueBtn.addActionListener(colorListener);
+
+        JButton greenBtn = new JButton("GREEN");
+        greenBtn.setBackground(Color.GREEN);
+        greenBtn.setForeground(Color.GREEN);
+        greenBtn.setPreferredSize(new Dimension(40, 40));
+        greenBtn.addActionListener(colorListener);
+
+        JButton orangeBtn = new JButton("ORANGE");
+        orangeBtn.setBackground(Color.ORANGE);
+        orangeBtn.setForeground(Color.ORANGE);
+        orangeBtn.setPreferredSize(new Dimension(40, 40));
+        orangeBtn.addActionListener(colorListener);
+
+        JPanel colorPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        colorPanel.add(mb);
+        colorPanel.add(blackBtn);
+        colorPanel.add(blueBtn);
+        colorPanel.add(greenBtn);
+        colorPanel.add(orangeBtn);
+
+        Icon brushIcon = new ImageIcon(getClass().getResource("/images/brush.jpg"));
+        Icon gradIcon = new ImageIcon(getClass().getResource("/images/gradient.png"));
+
+        brushButton = new JButton(brushIcon);
+        brushButton.setPreferredSize(new Dimension(40, 40));
+        gradButton = new JButton(gradIcon);
+        gradButton.setPreferredSize(new Dimension(40, 40));
+
+        brushButton.addActionListener(this);
+        gradButton.addActionListener(this);
+
+        colorPanel.add(brushButton);
+        colorPanel.add(gradButton);
+
+        add(colorPanel, BorderLayout.NORTH);
 
         // Drawing canvas
         dc = new DrawCanvas();
         // Make canvas scrollable
         JScrollPane scroll = new JScrollPane(dc, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
-        add(scroll);
+        add(scroll, BorderLayout.CENTER);
         
     }
 
@@ -101,6 +165,14 @@ public class MainWindow extends JFrame implements ActionListener {
         }
         else if(cmd.equalsIgnoreCase("Exit")) {
             System.exit(0);
+        }
+        
+        if(e.getSource() == gradButton) {
+            Color color = JColorChooser.showDialog(null, "Pick your color!", dc.getPaintColor());
+            if(color == null) {
+                color = dc.getPaintColor();
+            }
+            dc.setPaintColor(color);
         }
     }
 
