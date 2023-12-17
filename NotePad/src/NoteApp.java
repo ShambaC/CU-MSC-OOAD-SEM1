@@ -1,6 +1,5 @@
 import java.io.*;
 import java.nio.*;
-import java.io.FileReader;
 import java.nio.file.Files;
 
 import java.awt.BorderLayout;
