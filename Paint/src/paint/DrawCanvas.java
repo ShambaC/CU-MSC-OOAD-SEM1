@@ -1,6 +1,7 @@
 package paint;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
@@ -12,18 +13,29 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.geom.Ellipse2D;
+import java.awt.image.RenderedImage;
 
+import java.io.File;
+import java.io.IOException;
+
+import javax.imageio.ImageIO;
 import javax.swing.JComponent;
 
 public class DrawCanvas extends JComponent implements MouseListener, MouseMotionListener {
-    private Point currentPoint;
+    private Point startPoint, currentPoint;
     private Color drawColor;
     private int thickness;
     private Image img;
 
+    private enum DrawType {
+        BRUSH, RECT, OVAL
+    }
+    private DrawType type;
+
     public DrawCanvas() {
         drawColor = Color.BLACK;
         thickness = 10;
+        type = DrawType.BRUSH;
 
         addMouseListener(this);
         addMouseMotionListener(this);
@@ -40,19 +52,22 @@ public class DrawCanvas extends JComponent implements MouseListener, MouseMotion
             
             g2d.setPaint(Color.WHITE);
             g2d.fillRect(0, 0, getSize().width, getSize().height);
-            g2d.setPaint(drawColor);
         }
 
         g.drawImage(img, 0, 0, null);
         
         if(currentPoint != null) {
             g2d = (Graphics2D) img.getGraphics();
-            g2d.fillOval(currentPoint.x, currentPoint.y, thickness, thickness);
+            g2d.setPaint(drawColor);
+            if(type == DrawType.BRUSH) {                
+                g2d.fillOval(currentPoint.x, currentPoint.y, thickness, thickness);
+            }
         }
     }
 
     @Override
     public void mousePressed(MouseEvent e) {
+        startPoint = e.getPoint();
         currentPoint = e.getPoint();
     }
 
@@ -75,5 +90,43 @@ public class DrawCanvas extends JComponent implements MouseListener, MouseMotion
     public void mouseClicked(MouseEvent e) {
         currentPoint = e.getPoint();
         repaint();
+    }
+
+    @Override
+    public Dimension getPreferredSize() {
+        if(img == null) {
+            return super.getPreferredSize();
+        }
+        else {
+            int w = img.getWidth(null);
+            int h = img.getHeight(null);
+            return new Dimension(w, h);
+        }
+    }
+
+    public void NewPaint() {
+        img = null;
+        currentPoint = null;
+        repaint();
+    }
+
+    public void saveFile(File file) {
+        try {
+            ImageIO.write((RenderedImage) img, "PNG", file);
+        }
+        catch (IOException err) {
+            err.printStackTrace();
+        }
+    }
+
+    public void loadFile(File file) {
+        try {
+            img = null;
+            img = ImageIO.read(file);
+            repaint();
+        }
+        catch (IOException err) {
+            err.printStackTrace();
+        }
     }
 }
