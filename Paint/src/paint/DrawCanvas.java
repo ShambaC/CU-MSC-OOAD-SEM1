@@ -16,7 +16,7 @@ import java.awt.geom.Ellipse2D;
 import javax.swing.JComponent;
 
 public class DrawCanvas extends JComponent implements MouseListener, MouseMotionListener {
-    private Point startPoint, currentPoint;
+    private Point currentPoint;
     private Color drawColor;
     private int thickness;
     private Image img;
@@ -31,7 +31,6 @@ public class DrawCanvas extends JComponent implements MouseListener, MouseMotion
 
     @Override
     protected void paintComponent(Graphics g) {
-        // super.paint(g);
         Graphics2D g2d;
 
         if(img == null) {
@@ -47,22 +46,14 @@ public class DrawCanvas extends JComponent implements MouseListener, MouseMotion
         g.drawImage(img, 0, 0, null);
         
         if(currentPoint != null) {
-            Graphics2D g2d2 = (Graphics2D) g;
-            Ellipse2D eli = new Ellipse2D();
-            eli.setFrame(currentPoint.x, currentPoint.y, thickness, thickness);
-            g2d2.draw(eli);
+            g2d = (Graphics2D) img.getGraphics();
+            g2d.fillOval(currentPoint.x, currentPoint.y, thickness, thickness);
         }
     }
 
     @Override
     public void mousePressed(MouseEvent e) {
-        startPoint = e.getPoint();
         currentPoint = e.getPoint();
-    }
-
-    @Override
-    public void mouseReleased(MouseEvent e) {
-        startPoint = null;
     }
 
     @Override
@@ -72,11 +63,14 @@ public class DrawCanvas extends JComponent implements MouseListener, MouseMotion
     }
 
     @Override
+    public void mouseReleased(MouseEvent e) {}
+    @Override
     public void mouseMoved(MouseEvent e) {}
     @Override
     public void mouseEntered(MouseEvent e) {}
     @Override
     public void mouseExited(MouseEvent e) {}
+
     @Override
     public void mouseClicked(MouseEvent e) {
         currentPoint = e.getPoint();
