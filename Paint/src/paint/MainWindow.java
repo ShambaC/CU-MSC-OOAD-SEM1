@@ -73,16 +73,29 @@ public class MainWindow extends JFrame implements ActionListener {
             public void actionPerformed(ActionEvent e) {
                 String cmd = e.getActionCommand();
                 if(cmd.equalsIgnoreCase("BLACK")) { dc.setPaintColor(Color.BLACK); }
+                else if(cmd.equalsIgnoreCase("WHITE")) { dc.setPaintColor(Color.WHITE); }
                 else if(cmd.equalsIgnoreCase("BLUE")) { dc.setPaintColor(Color.BLUE); }
                 else if(cmd.equalsIgnoreCase("GREEN")) { dc.setPaintColor(Color.GREEN); }
                 else if(cmd.equalsIgnoreCase("ORANGE")) { dc.setPaintColor(Color.ORANGE); }
             }
         };
 
+        JButton dummy1 = new JButton();
+        dummy1.setBackground(new Color(118, 122, 122));
+        dummy1.setPreferredSize(new Dimension(40, 40));
+        JButton dummy2 = new JButton();
+        dummy2.setBackground(new Color(118, 122, 122));
+        dummy2.setPreferredSize(new Dimension(40, 40));
+
         JButton blackBtn = new JButton("BLACK");
         blackBtn.setBackground(Color.BLACK);
         blackBtn.setPreferredSize(new Dimension(40, 40));
         blackBtn.addActionListener(colorListener);
+
+        JButton whiteBtn = new JButton("WHITE");
+        whiteBtn.setBackground(Color.WHITE);
+        whiteBtn.setPreferredSize(new Dimension(40, 40));
+        whiteBtn.addActionListener(colorListener);
         
         JButton blueBtn = new JButton("BLUE");
         blueBtn.setBackground(Color.BLUE);
@@ -103,13 +116,17 @@ public class MainWindow extends JFrame implements ActionListener {
         orangeBtn.addActionListener(colorListener);
 
         JPanel colorPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        colorPanel.setBackground(new Color(118, 122, 122));
         colorPanel.add(mb);
+        colorPanel.add(dummy1);
         colorPanel.add(blackBtn);
+        colorPanel.add(whiteBtn);
         colorPanel.add(blueBtn);
         colorPanel.add(greenBtn);
         colorPanel.add(orangeBtn);
+        colorPanel.add(dummy2);
 
-        Icon brushIcon = new ImageIcon(getClass().getResource("/images/brush.jpg"));
+        Icon brushIcon = new ImageIcon(getClass().getResource("/images/brush.png"));
         Icon gradIcon = new ImageIcon(getClass().getResource("/images/gradient.png"));
 
         brushButton = new JButton(brushIcon);
@@ -166,7 +183,9 @@ public class MainWindow extends JFrame implements ActionListener {
         else if(cmd.equalsIgnoreCase("Exit")) {
             System.exit(0);
         }
-        
+        if(e.getSource() == brushButton) {
+            dc.setBrushType(DrawType.BRUSH);
+        }
         if(e.getSource() == gradButton) {
             Color color = JColorChooser.showDialog(null, "Pick your color!", dc.getPaintColor());
             if(color == null) {

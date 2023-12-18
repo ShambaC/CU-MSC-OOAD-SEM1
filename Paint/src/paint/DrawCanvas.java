@@ -27,9 +27,6 @@ public class DrawCanvas extends JComponent implements MouseListener, MouseMotion
     private int thickness;
     private Image img;
 
-    private enum DrawType {
-        BRUSH, RECT, OVAL
-    }
     private DrawType type;
 
     public DrawCanvas() {
@@ -136,5 +133,9 @@ public class DrawCanvas extends JComponent implements MouseListener, MouseMotion
 
     public Color getPaintColor() {
         return drawColor;
+    }
+
+    public void setBrushType(DrawType type) {
+        this.type = type;
     }
 }
