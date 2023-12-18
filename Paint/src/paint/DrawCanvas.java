@@ -56,6 +56,7 @@ public class DrawCanvas extends JComponent implements MouseListener, MouseMotion
         if(currentPoint != null) {
             g2d = (Graphics2D) img.getGraphics();
             g2d.setPaint(drawColor);
+            g.setColor(drawColor);
             if(type == DrawType.BRUSH) {                
                 g2d.fillOval(currentPoint.x, currentPoint.y, thickness, thickness);
             }

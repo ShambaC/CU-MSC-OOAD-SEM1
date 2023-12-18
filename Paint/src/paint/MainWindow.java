@@ -218,6 +218,7 @@ public class MainWindow extends JFrame implements ActionListener {
         }
         if(e.getSource() == eraserButton) {
             dc.setPaintColor(Color.WHITE);
+            dc.setBrushType(DrawType.BRUSH);
         }
         if(e.getSource() == gradButton) {
             Color color = JColorChooser.showDialog(null, "Pick your color!", dc.getPaintColor());
