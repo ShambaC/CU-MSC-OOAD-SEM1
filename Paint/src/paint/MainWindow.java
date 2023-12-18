@@ -25,7 +25,7 @@ import javax.swing.UIManager;
 public class MainWindow extends JFrame implements ActionListener {
     DrawCanvas dc;
 
-    JButton brushButton, gradButton;
+    JButton brushButton, rectButton, ellipseButton, eraserButton, gradButton;
     
     public MainWindow() {
         setTitle("Untitled");
@@ -77,6 +77,7 @@ public class MainWindow extends JFrame implements ActionListener {
                 else if(cmd.equalsIgnoreCase("BLUE")) { dc.setPaintColor(Color.BLUE); }
                 else if(cmd.equalsIgnoreCase("GREEN")) { dc.setPaintColor(Color.GREEN); }
                 else if(cmd.equalsIgnoreCase("ORANGE")) { dc.setPaintColor(Color.ORANGE); }
+                else if(cmd.equalsIgnoreCase("RED")) { dc.setPaintColor(Color.RED); }
             }
         };
 
@@ -94,6 +95,7 @@ public class MainWindow extends JFrame implements ActionListener {
 
         JButton whiteBtn = new JButton("WHITE");
         whiteBtn.setBackground(Color.WHITE);
+        whiteBtn.setForeground(Color.WHITE);
         whiteBtn.setPreferredSize(new Dimension(40, 40));
         whiteBtn.addActionListener(colorListener);
         
@@ -115,6 +117,12 @@ public class MainWindow extends JFrame implements ActionListener {
         orangeBtn.setPreferredSize(new Dimension(40, 40));
         orangeBtn.addActionListener(colorListener);
 
+        JButton redBtn = new JButton("RED");
+        redBtn.setBackground(Color.RED);
+        redBtn.setForeground(Color.RED);
+        redBtn.setPreferredSize(new Dimension(40, 40));
+        redBtn.addActionListener(colorListener);
+
         JPanel colorPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         colorPanel.setBackground(new Color(118, 122, 122));
         colorPanel.add(mb);
@@ -124,20 +132,36 @@ public class MainWindow extends JFrame implements ActionListener {
         colorPanel.add(blueBtn);
         colorPanel.add(greenBtn);
         colorPanel.add(orangeBtn);
+        colorPanel.add(redBtn);
         colorPanel.add(dummy2);
 
         Icon brushIcon = new ImageIcon(getClass().getResource("/images/brush.png"));
+        Icon rectIcon = new ImageIcon(getClass().getResource("/images/rectangle.png"));
+        Icon ellipseIcon = new ImageIcon(getClass().getResource("/images/ellipse.png"));
+        Icon eraserIcon = new ImageIcon(getClass().getResource("/images/eraser.png"));
         Icon gradIcon = new ImageIcon(getClass().getResource("/images/gradient.png"));
 
         brushButton = new JButton(brushIcon);
         brushButton.setPreferredSize(new Dimension(40, 40));
+        rectButton = new JButton(rectIcon);
+        rectButton.setPreferredSize(new Dimension(40, 40));
+        ellipseButton = new JButton(ellipseIcon);
+        ellipseButton.setPreferredSize(new Dimension(40, 40));
+        eraserButton = new JButton(eraserIcon);
+        eraserButton.setPreferredSize(new Dimension(40, 40));
         gradButton = new JButton(gradIcon);
         gradButton.setPreferredSize(new Dimension(40, 40));
 
         brushButton.addActionListener(this);
+        rectButton.addActionListener(this);
+        ellipseButton.addActionListener(this);
+        eraserButton.addActionListener(this);
         gradButton.addActionListener(this);
 
         colorPanel.add(brushButton);
+        colorPanel.add(rectButton);
+        colorPanel.add(ellipseButton);
+        colorPanel.add(eraserButton);
         colorPanel.add(gradButton);
 
         add(colorPanel, BorderLayout.NORTH);
@@ -185,6 +209,15 @@ public class MainWindow extends JFrame implements ActionListener {
         }
         if(e.getSource() == brushButton) {
             dc.setBrushType(DrawType.BRUSH);
+        }
+        if(e.getSource() == rectButton) {
+            dc.setBrushType(DrawType.RECT);
+        }
+        if(e.getSource() == ellipseButton) {
+            dc.setBrushType(DrawType.OVAL);
+        }
+        if(e.getSource() == eraserButton) {
+            dc.setPaintColor(Color.WHITE);
         }
         if(e.getSource() == gradButton) {
             Color color = JColorChooser.showDialog(null, "Pick your color!", dc.getPaintColor());

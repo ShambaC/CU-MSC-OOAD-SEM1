@@ -22,7 +22,7 @@ import javax.imageio.ImageIO;
 import javax.swing.JComponent;
 
 public class DrawCanvas extends JComponent implements MouseListener, MouseMotionListener {
-    private Point startPoint, currentPoint;
+    private Point startPoint, currentPoint, finalPoint, rectPoint;
     private Color drawColor;
     private int thickness;
     private Image img;
@@ -59,6 +59,21 @@ public class DrawCanvas extends JComponent implements MouseListener, MouseMotion
             if(type == DrawType.BRUSH) {                
                 g2d.fillOval(currentPoint.x, currentPoint.y, thickness, thickness);
             }
+            else if(type == DrawType.RECT && finalPoint != null) {
+                g2d.drawRect(Math.min(startPoint.x, finalPoint.x), Math.min(startPoint.y, finalPoint.y), Math.abs(startPoint.x - finalPoint.x), Math.abs(startPoint.y - finalPoint.y));
+                finalPoint = null;
+            }
+            else if(type == DrawType.OVAL && finalPoint != null) {
+                g2d.drawOval(Math.min(startPoint.x, finalPoint.x), Math.min(startPoint.y, finalPoint.y), Math.abs(startPoint.x - finalPoint.x), Math.abs(startPoint.y - finalPoint.y));
+                finalPoint = null;
+            }
+
+            if(type == DrawType.RECT) {
+                g.drawRect(Math.min(startPoint.x, currentPoint.x), Math.min(startPoint.y, currentPoint.y), Math.abs(startPoint.x - currentPoint.x), Math.abs(startPoint.y - currentPoint.y));
+            }
+            else if(type == DrawType.OVAL) {
+                g.drawOval(Math.min(startPoint.x, currentPoint.x), Math.min(startPoint.y, currentPoint.y), Math.abs(startPoint.x - currentPoint.x), Math.abs(startPoint.y - currentPoint.y));
+            }
         }
     }
 
@@ -75,7 +90,12 @@ public class DrawCanvas extends JComponent implements MouseListener, MouseMotion
     }
 
     @Override
-    public void mouseReleased(MouseEvent e) {}
+    public void mouseReleased(MouseEvent e) {
+        if(type == DrawType.RECT || type == DrawType.OVAL) {
+            finalPoint = e.getPoint();
+        }
+        repaint();
+    }
     @Override
     public void mouseMoved(MouseEvent e) {}
     @Override
@@ -118,7 +138,6 @@ public class DrawCanvas extends JComponent implements MouseListener, MouseMotion
 
     public void loadFile(File file) {
         try {
-            img = null;
             img = ImageIO.read(file);
             repaint();
         }
