@@ -10,6 +10,7 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.text.html.HTMLDocument.Iterator;
 
 public class Decompiler extends JFrame {
     private File file;
@@ -55,27 +56,100 @@ public class Decompiler extends JFrame {
         
         String classToLoad = d.getClassName();
 
-        Class theClass = Class.forName(classToLoad);
+        try {
+            Class theClass = Class.forName(classToLoad);
 
-        String loadedClassName = theClass.getSimpleName();
+            String loadedClassName = theClass.getSimpleName();
 
-        int classModifiers = theClass.getModifiers();
-        bool isPublic = Modifier.isPublic(classModifiers);
-        bool isPrivate = Modifier.isPrivate(classModifiers);
-        bool isAbstract = Modifier.isAbstract(classModifiers);
-        bool isFinal = Modifier.isFinal(classModifiers);
+            int classModifiers = theClass.getModifiers();
+            boolean isPublic = Modifier.isPublic(classModifiers);
+            boolean isPrivate = Modifier.isPrivate(classModifiers);
+            boolean isAbstract = Modifier.isAbstract(classModifiers);
+            boolean isFinal = Modifier.isFinal(classModifiers);
 
-        bool isInterface = theClass.isInterface();
+            boolean isInterface = theClass.isInterface();
 
-        Class [] implInterfaces = theClass.getInterfaces();
+            Class [] implInterfaces = theClass.getInterfaces();
 
-        Class thisSuper = theClass.getSuperclass();
+            Class thisSuper = theClass.getSuperclass();
 
-        Field [] declareFields = theClass.getDeclaredFields();
+            Field [] declareFields = theClass.getDeclaredFields();
 
-        Method [] declareMethods = theClass.getDeclaredMethods();
+            Method [] declareMethods = theClass.getDeclaredMethods();
 
-        d.setCode("LOL");
-        d.setVisible(true);
+            // Tests
+            System.out.println(loadedClassName);
+            System.out.println(isPublic);
+            System.out.println(isPrivate);
+            System.out.println(isAbstract);
+            System.out.println(isFinal);
+            System.out.println(isInterface);
+            for(Class c : implInterfaces) {
+                System.out.println(c.toGenericString());
+            }
+            System.out.println(thisSuper.toGenericString());
+            for(Field f : declareFields) {
+                System.out.println(f.toGenericString());
+            }
+            for(Method m : declareMethods) {
+                System.out.println(m.toGenericString());
+            }
+
+            // Generate code stub
+
+            String sourceCode = "";
+            String dependecies = "";
+            String mainContent = "";
+
+            if(isPublic) {
+                mainContent += "public ";
+            }
+            else if(isPrivate) {
+                mainContent += "private ";
+            }
+            else {
+                mainContent += "protected";
+            }
+
+            if(isAbstract) { mainContent += "abstract "; }
+            if(isFinal) { mainContent += "final "; }
+            if(isInterface) { mainContent += "interface "; }
+
+            mainContent += "class " + loadedClassName;
+
+            if(thisSuper != null) {
+                String [] classDets = thisSuper.toGenericString().split(" ");
+                dependecies += "import " + classDets[classDets.length - 1] + ";\n";
+                
+                String [] superClassNameArr = classDets[classDets.length - 1].split("\\.");
+                mainContent += " extends " + superClassNameArr[superClassNameArr.length - 1];
+            }
+
+            if(implInterfaces != null) {
+                mainContent += " implements ";
+                int count = 0;
+                for(Class c : implInterfaces) {
+                    String [] intTempString = c.toGenericString().split(" ");
+                    dependecies += "import " + intTempString[intTempString.length - 1] + ";\n";
+                    String [] resInterface = intTempString[intTempString.length - 1].split("\\.");
+                    mainContent += resInterface[resInterface.length -1];
+                    count++;
+                    if(count != implInterfaces.length) {
+                        mainContent += ", ";
+                    }
+                }
+            }
+            
+            dependecies += "\n";
+            sourceCode += dependecies + mainContent;
+
+            // Output
+            d.setCode(sourceCode);
+            d.setVisible(true);
+
+        }
+        catch(ClassNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 }
