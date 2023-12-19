@@ -2,7 +2,7 @@ import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-
+import java.awt.Font;
 import java.awt.Insets;
 
 import javax.swing.JFileChooser;
@@ -38,6 +38,7 @@ public class Decompiler extends JFrame {
 
         tArea = new JTextArea();
         tArea.setMargin(new Insets(5, 10, 10, 0));
+        tArea.setFont(new Font("Helvetica", Font.PLAIN, 20));
 
         JScrollPane scroll = new JScrollPane(tArea, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         add(scroll);
@@ -139,6 +140,8 @@ public class Decompiler extends JFrame {
                     }
                 }
             }
+
+            mainContent += " { \n";
             
             dependecies += "\n";
             sourceCode += dependecies + mainContent;
