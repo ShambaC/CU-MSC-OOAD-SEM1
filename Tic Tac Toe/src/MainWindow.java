@@ -12,14 +12,27 @@ import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.KeyEventDispatcher;
 import java.awt.KeyboardFocusManager;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
+class boardButton extends JButton {
+    private Point coords;
+
+    public boardButton(Point coords) {
+        this.coords = coords;
+    }
+    
+    public Point getPoint() {
+        return coords;
+    }
+}
+
 public class MainWindow extends JFrame implements ActionListener {
     private int [][] boardArr = new int[3][3];
-    private JButton cell00, cell01, cell02, cell10, cell11, cell12, cell20, cell21, cell22;
+    private boardButton [] buttons;
 
     private enum playType {
         CROSS, OVAL
@@ -54,9 +67,17 @@ public class MainWindow extends JFrame implements ActionListener {
     }
 
     private void initCmp() {
+        int count = -1;
+        Border cellBorder = BorderFactory.createLineBorder(new Color(82, 81, 79), 4, true);
         for(int i = 0; i < 3; i++) {
             for(int j = 0; j < 3; j++) {
                 boardArr[i][j] = -1;
+
+                count++;
+                boardButton[count] = new boardButton(new Point(i, j));
+                boardButton[count].setPreferredSize(new Dimension(128, 128));
+                boardButton[count].setBackground(new Color(219, 200, 160));
+                boardButton[count].setBorder(cellBorder);
             }
         }
         isPlayerTurn = true;
@@ -77,72 +98,10 @@ public class MainWindow extends JFrame implements ActionListener {
         add(turnText);
         add(scoreText);
 
-        Border cellBorder = BorderFactory.createLineBorder(new Color(82, 81, 79), 4, true);
-
-        cell00 = new JButton();
-        cell00.setPreferredSize(new Dimension(128, 128));
-        cell00.setBackground(new Color(219, 200, 160));
-        cell00.setBorder(cellBorder);
-
-        cell01 = new JButton();
-        cell01.setPreferredSize(new Dimension(128, 128));
-        cell01.setBackground(new Color(219, 200, 160));
-        cell01.setBorder(cellBorder);
-
-        cell02 = new JButton();
-        cell02.setPreferredSize(new Dimension(128, 128));
-        cell02.setBackground(new Color(219, 200, 160));
-        cell02.setBorder(cellBorder);
-
-        cell10 = new JButton();
-        cell10.setPreferredSize(new Dimension(128, 128));
-        cell10.setBackground(new Color(219, 200, 160));
-        cell10.setBorder(cellBorder);
-
-        cell11 = new JButton();
-        cell11.setPreferredSize(new Dimension(128, 128));
-        cell11.setBackground(new Color(219, 200, 160));
-        cell11.setBorder(cellBorder);
-
-        cell12 = new JButton();
-        cell12.setPreferredSize(new Dimension(128, 128));
-        cell12.setBackground(new Color(219, 200, 160));
-        cell12.setBorder(cellBorder);
-
-        cell20 = new JButton();
-        cell20.setPreferredSize(new Dimension(128, 128));
-        cell20.setBackground(new Color(219, 200, 160));
-        cell20.setBorder(cellBorder);
-
-        cell21 = new JButton();
-        cell21.setPreferredSize(new Dimension(128, 128));
-        cell21.setBackground(new Color(219, 200, 160));
-        cell21.setBorder(cellBorder);
-
-        cell22 = new JButton();
-        cell22.setPreferredSize(new Dimension(128, 128));
-        cell22.setBackground(new Color(219, 200, 160));
-        cell22.setBorder(cellBorder);
-
-        add(cell00);
-        add(cell01);
-        add(cell02);
-        add(cell10);
-        add(cell11);
-        add(cell12);
-        add(cell20);
-        add(cell21);
-        add(cell22);
-
-        cell00.addActionListener(this);
-        cell01.addActionListener(this);
-        cell02.addActionListener(this);
-        cell10.addActionListener(this);
-        cell11.addActionListener(this);
-        cell12.addActionListener(this);
-        cell20.addActionListener(this);
-        cell21.addActionListener(this);
-        cell22.addActionListener(this);
+        for(int i = 0; i < 9; i++) {
+            add(boardButton[i]);
+            boardButton[i].addActionListener(this);
+        }
 
     }
 
@@ -158,6 +117,8 @@ public class MainWindow extends JFrame implements ActionListener {
     }
 
     private void RestartGame() {
+
+
         StartGame();
     }
 
