@@ -10,8 +10,12 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
+import java.awt.KeyEventDispatcher;
+import java.awt.KeyboardFocusManager;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 
 public class MainWindow extends JFrame implements ActionListener {
     private int [][] boardArr = new int[3][3];
@@ -21,13 +25,30 @@ public class MainWindow extends JFrame implements ActionListener {
         CROSS, OVAL
     }
     private playType playerType;
-    private playType AIType;
+    private boolean isPlayerTurn;
+
+    private Icon XIcon = new ImageIcon(getClass().getResource("/images/X.png"));
+    private Icon OIcon = new ImageIcon(getClass().getResource("/images/O.png"));
+
+    private class Dispatcher implements KeyEventDispatcher {
+        @Override
+        public boolean dispatchKeyEvent(KeyEvent e) {
+            if(e.getID() == KeyEvent.KEY_PRESSED && e.getKeyCode() == KeyEvent.VK_R) {
+                System.out.println("Restarting game");
+                RestartGame();
+            }
+
+            return false;
+        }
+    }
 
     public MainWindow() {
         setTitle("Tic Tac Toe");
         setSize(400, 512);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setBackground(new Color(146, 157, 176));
+        KeyboardFocusManager manager = KeyboardFocusManager.getCurrentKeyboardFocusManager();
+        manager.addKeyEventDispatcher(new Dispatcher());
         StartGame();
         initCmp();
     }
@@ -38,6 +59,7 @@ public class MainWindow extends JFrame implements ActionListener {
                 boardArr[i][j] = -1;
             }
         }
+        isPlayerTurn = true;
 
         setLayout(new GridLayout(4, 3, 5, 5));
         setResizable(false);
@@ -56,9 +78,6 @@ public class MainWindow extends JFrame implements ActionListener {
         add(scoreText);
 
         Border cellBorder = BorderFactory.createLineBorder(new Color(82, 81, 79), 4, true);
-
-        Icon XIcon = new ImageIcon(getClass().getResource("/images/X.png"));
-        Icon OIcon = new ImageIcon(getClass().getResource("/images/O.png"));
 
         cell00 = new JButton();
         cell00.setPreferredSize(new Dimension(128, 128));
@@ -115,6 +134,16 @@ public class MainWindow extends JFrame implements ActionListener {
         add(cell21);
         add(cell22);
 
+        cell00.addActionListener(this);
+        cell01.addActionListener(this);
+        cell02.addActionListener(this);
+        cell10.addActionListener(this);
+        cell11.addActionListener(this);
+        cell12.addActionListener(this);
+        cell20.addActionListener(this);
+        cell21.addActionListener(this);
+        cell22.addActionListener(this);
+
     }
 
     private void StartGame() {
@@ -122,18 +151,26 @@ public class MainWindow extends JFrame implements ActionListener {
         
         if(res == 0) {
             playerType = playType.CROSS;
-            AIType = playType.OVAL;
         }
         else {
             playerType = playType.OVAL;
-            AIType = playType.CROSS;
         }
+    }
+
+    private void RestartGame() {
+        StartGame();
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        
+        JButton btnClicked = (JButton) e.getSource();
+        if(playerType == playType.CROSS)
+            btnClicked.setIcon(XIcon);
+        else
+            btnClicked.setIcon(OIcon);
     }
+
+    
 
     public static void main(String[] args) {
         MainWindow mw = new MainWindow();
