@@ -19,6 +19,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.util.ArrayList;
+import java.util.Random;
 
 class boardButton extends JButton {
     private Point coords;
@@ -50,6 +52,7 @@ public class MainWindow extends JFrame implements ActionListener {
     private JLabel turnText;
 
     private int playerType;
+    private int AItype;
     private boolean isPlayerTurn;
 
     private Icon XIcon = new ImageIcon(getClass().getResource("/images/X.png"));
@@ -123,9 +126,11 @@ public class MainWindow extends JFrame implements ActionListener {
         
         if(res == 0) {
             playerType = 1;
+            AItype = 0;
         }
         else {
             playerType = 0;
+            AItype = 1;
         }
     }
 
@@ -165,7 +170,7 @@ public class MainWindow extends JFrame implements ActionListener {
             //         }
             //     }
             // }
-
+            
             if(boardArr[0][0] == boardArr[0][1] && boardArr[0][1] == boardArr[0][2] && boardArr[0][0] != -1) {
                 if(boardArr[0][0] == playerType) {
                     winner = "player";
@@ -247,9 +252,167 @@ public class MainWindow extends JFrame implements ActionListener {
             Timer timer = new Timer(2000, new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
+                
+                    // COMPUTER PLAYER LOGIC
+                    ArrayList<Point> AIWinPos = new ArrayList<Point>();
+                    ArrayList<Point> playerWinPos = new ArrayList<Point>();
+
+                    // ROW CHECK
+                    for(int i = 0; i < 3; i++) {
+                        int countPlayerMarks = 0;
+                        int countAIMarks = 0;
+                        int emptyCellLoc = -1;
+                        for(int j = 0; j < 3; j++) {
+                            if(boardArr[i][j] == playerType) {
+                                countPlayerMarks++;
+                            }
+                            else if(boardArr[i][j] == AItype) {
+                                countAIMarks++;
+                            }
+                            else {
+                                emptyCellLoc = j;
+                            }
+                        }
+
+                        if(countAIMarks == 2 && emptyCellLoc != -1) {
+                            AIWinPos.add(new Point(i, emptyCellLoc));
+                        }
+                        if(countPlayerMarks == 2 && emptyCellLoc != -1) {
+                            playerWinPos.add(new Point(i, emptyCellLoc));
+                        }
+                    }
+
+                    // COLUMN CHECK
+                    for(int i = 0; i < 3; i++) {
+                        int countPlayerMarks = 0;
+                        int countAIMarks = 0;
+                        int emptyCellLoc = -1;
+                        for(int j = 0; j < 3; j++) {
+                            if(boardArr[j][i] == playerType) {
+                                countPlayerMarks++;
+                            }
+                            else if(boardArr[j][i] == AItype) {
+                                countAIMarks++;
+                            }
+                            else {
+                                emptyCellLoc = j;
+                            }
+                        }
+
+                        if(countAIMarks == 2 && emptyCellLoc != -1) {
+                            AIWinPos.add(new Point(emptyCellLoc, i));
+                        }
+                        if(countPlayerMarks == 2 && emptyCellLoc != -1) {
+                            playerWinPos.add(new Point(emptyCellLoc, i));
+                        }
+                    }
+
+                    // LEFT DIAGONAL CHECK
+                    int countPlayerMarks = 0;
+                    int countAIMarks = 0;
+                    int emptyCellLoc = -1;
+                    for(int i = 0; i < 3; i++) {
+                        if(boardArr[i][i] == playerType) {
+                            countPlayerMarks++;
+                        }
+                        else if(boardArr[i][i] == AItype) {
+                            countAIMarks++;
+                        }
+                        else {
+                            emptyCellLoc = i;
+                        }
+                    }
+                    if(countAIMarks == 2 && emptyCellLoc != -1) {
+                        AIWinPos.add(new Point(emptyCellLoc, emptyCellLoc));
+                    }
+                    if(countPlayerMarks == 2 && emptyCellLoc != -1) {
+                        playerWinPos.add(new Point(emptyCellLoc, emptyCellLoc));
+                    }
+
+                    // RIGHT DIAGONAL CHECK
+                    countPlayerMarks = 0;
+                    countAIMarks = 0;
+                    emptyCellLoc = -1;
+                    for(int i = 0; i < 3; i++) {
+                        for(int j = 0; j < 3; j++) {
+                            if(i + j == 2) {
+                                if(boardArr[i][j] == playerType) {
+                                    countPlayerMarks++;
+                                }
+                                else if(boardArr[i][j] == AItype) {
+                                    countAIMarks++;
+                                }
+                                else {
+                                    emptyCellLoc = j;
+                                }
+                            }
+                        }
+
+                        if(countAIMarks == 2 && emptyCellLoc != -1) {
+                            AIWinPos.add(new Point(2 - emptyCellLoc, emptyCellLoc));
+                        }
+                        if(countPlayerMarks == 2 && emptyCellLoc != -1) {
+                            playerWinPos.add(new Point(2 - emptyCellLoc, emptyCellLoc));
+                        }
+                    }
+
+                    // Place mark and make move
+                    if(!AIWinPos.isEmpty()) {
+                        Point tempPoint = AIWinPos.get(0);
+                        boardArr[tempPoint.x][tempPoint.y] = AItype;
+                        
+                        for(boardButton b : buttons) {
+                            if(b.getPoint() == tempPoint) {
+                                if(AItype == 1) {
+                                    b.setIcon(XIcon);
+                                }
+                                else {
+                                    b.setIcon(OIcon);
+                                }
+                                b.setStatus(false);
+                                break;
+                            }
+                        }
+                    }
+                    else if(!playerWinPos.isEmpty()) {
+                        Point tempPoint = playerWinPos.get(0);
+                        boardArr[tempPoint.x][tempPoint.y] = AItype;
+                        
+                        for(boardButton b : buttons) {
+                            if(b.getPoint() == tempPoint) {
+                                if(AItype == 1) {
+                                    b.setIcon(XIcon);
+                                }
+                                else {
+                                    b.setIcon(OIcon);
+                                }
+                                b.setStatus(false);
+                                break;
+                            }
+                        }
+                    }
+                    else {
+                        for(boardButton b : buttons) {
+                            if(b.getStatus()) {
+                                boardArr[b.getPoint().x][b.getPoint().y] = AItype;
+                                if(AItype == 1) {
+                                    b.setIcon(XIcon);
+                                }
+                                else {
+                                    b.setIcon(OIcon);
+                                }
+                                b.setStatus(false);
+                                break;
+                            }
+                        }
+                    }
+
+
                     incrementMove();
-                    isPlayerTurn = true;
-                    turnText.setText("Player");
+                    if(!winCheck()) {
+                        isPlayerTurn = true;
+                        turnText.setText("Player");
+                    }
                 }
             });
             timer.setRepeats(false);
