@@ -4,6 +4,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.border.Border;
 
 import java.awt.Color;
@@ -17,6 +18,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.util.concurrent.TimeUnit;
 
 class boardButton extends JButton {
     private Point coords;
@@ -32,12 +34,12 @@ class boardButton extends JButton {
 
 public class MainWindow extends JFrame implements ActionListener {
     private int [][] boardArr = new int[3][3];
-    private boardButton [] buttons;
+    private boardButton [] buttons = new boardButton[9];
+    private int moves = 0;
+    private String winner = "none";
+    private JLabel turnText;
 
-    private enum playType {
-        CROSS, OVAL
-    }
-    private playType playerType;
+    private int playerType;
     private boolean isPlayerTurn;
 
     private Icon XIcon = new ImageIcon(getClass().getResource("/images/X.png"));
@@ -74,10 +76,10 @@ public class MainWindow extends JFrame implements ActionListener {
                 boardArr[i][j] = -1;
 
                 count++;
-                boardButton[count] = new boardButton(new Point(i, j));
-                boardButton[count].setPreferredSize(new Dimension(128, 128));
-                boardButton[count].setBackground(new Color(219, 200, 160));
-                boardButton[count].setBorder(cellBorder);
+                buttons[count] = new boardButton(new Point(i, j));
+                buttons[count].setPreferredSize(new Dimension(128, 128));
+                buttons[count].setBackground(new Color(219, 200, 160));
+                buttons[count].setBorder(cellBorder);
             }
         }
         isPlayerTurn = true;
@@ -88,7 +90,7 @@ public class MainWindow extends JFrame implements ActionListener {
         JLabel text1 = new JLabel("<html>Your<br>Turn: ");
         text1.setFont(new Font("Comic Sans MS", Font.PLAIN, 24));
         text1.setHorizontalAlignment(JLabel.CENTER);
-        JLabel turnText = new JLabel("X");
+        turnText = new JLabel("Player");
         turnText.setFont(new Font("Comic Sans MS", Font.PLAIN, 30));
         turnText.setHorizontalAlignment(JLabel.CENTER);
         JLabel scoreText = new JLabel("<html>X Score: 0<br>O Score: 0");
@@ -99,36 +101,171 @@ public class MainWindow extends JFrame implements ActionListener {
         add(scoreText);
 
         for(int i = 0; i < 9; i++) {
-            add(boardButton[i]);
-            boardButton[i].addActionListener(this);
+            add(buttons[i]);
+            buttons[i].addActionListener(this);
         }
 
     }
 
     private void StartGame() {
+        isPlayerTurn = true;
         int res = (int)(Math.random() * 2);
         
         if(res == 0) {
-            playerType = playType.CROSS;
+            playerType = 1;
         }
         else {
-            playerType = playType.OVAL;
+            playerType = 0;
         }
     }
 
     private void RestartGame() {
-
+        // Reset everything
+        for(boardButton b : buttons) {
+            b.setIcon(null);
+            b.setEnabled(true);
+        }
+        moves = 0;
+        for(int i = 0; i < 3; i++) {
+            for(int j = 0; j < 3; j++) {
+                boardArr[i][j] = -1;
+            }
+        }
+        winner = "none";
 
         StartGame();
     }
 
+    private void incrementMove() {
+        moves++;
+    }
+
+    private boolean winCheck() {
+        if(moves >= 3) {
+            // //rows check
+            // for(int i = 0; i < 3; i++) {
+            //     int moveStore = -1;
+            //     for(int j = 0; j < 2; j++) {
+            //         if(j == 0 && boardArr[i][j] == -1) {
+            //             j = 2;
+            //             continue;
+            //         }
+            //         if(j == 0) {
+            //             moveStore = boardArr[i][j];
+            //         }
+            //     }
+            // }
+
+            if(boardArr[0][0] == boardArr[0][1] && boardArr[0][1] == boardArr[0][2] && boardArr[0][0] != -1) {
+                if(boardArr[0][0] == playerType) {
+                    winner = "player";
+                }
+                else {
+                    winner = "AI";
+                }
+            }
+            else if(boardArr[1][0] == boardArr[1][1] && boardArr[1][1] == boardArr[1][2] && boardArr[1][0] != -1) {
+                if(boardArr[1][0] == playerType) {
+                    winner = "player";
+                }
+                else {
+                    winner = "AI";
+                }
+            }
+            else if(boardArr[2][0] == boardArr[2][1] && boardArr[2][1] == boardArr[2][2] && boardArr[2][0] != -1) {
+                if(boardArr[2][0] == playerType) {
+                    winner = "player";
+                }
+                else {
+                    winner = "AI";
+                }
+            }
+            else if(boardArr[0][0] == boardArr[1][0] && boardArr[1][0] == boardArr[2][0] && boardArr[0][0] != -1) {
+                if(boardArr[0][0] == playerType) {
+                    winner = "player";
+                }
+                else {
+                    winner = "AI";
+                }
+            }
+            else if(boardArr[0][1] == boardArr[1][1] && boardArr[1][1] == boardArr[2][1] && boardArr[0][1] != -1) {
+                if(boardArr[0][1] == playerType) {
+                    winner = "player";
+                }
+                else {
+                    winner = "AI";
+                }
+            }
+            else if(boardArr[0][2] == boardArr[1][2] && boardArr[1][2] == boardArr[2][2] && boardArr[0][2] != -1) {
+                if(boardArr[0][2] == playerType) {
+                    winner = "player";
+                }
+                else {
+                    winner = "AI";
+                }
+            }
+            else if(boardArr[0][0] == boardArr[1][1] && boardArr[1][1] == boardArr[2][2] && boardArr[0][0] != -1) {
+                if(boardArr[0][0] == playerType) {
+                    winner = "player";
+                }
+                else {
+                    winner = "AI";
+                }
+            }
+            else if(boardArr[0][2] == boardArr[1][1] && boardArr[1][1] == boardArr[2][0] && boardArr[0][2] != -1) {
+                if(boardArr[0][2] == playerType) {
+                    winner = "player";
+                }
+                else {
+                    winner = "AI";
+                }
+            }
+
+            if(!winner.equalsIgnoreCase("none")) {
+                JOptionPane.showMessageDialog(this, "The winner is " + winner + "!!", "Winner", JOptionPane.INFORMATION_MESSAGE);
+                RestartGame();
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void AIMove() {
+        if(!isPlayerTurn) {
+            try {
+                turnText.setText("AI");
+                TimeUnit.SECONDS.sleep(2);
+            }
+            catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        
+            incrementMove();
+            isPlayerTurn = true;
+            turnText.setText("Player");
+        }
+    }
+
     @Override
     public void actionPerformed(ActionEvent e) {
-        JButton btnClicked = (JButton) e.getSource();
-        if(playerType == playType.CROSS)
-            btnClicked.setIcon(XIcon);
-        else
-            btnClicked.setIcon(OIcon);
+        boardButton btnClicked = (boardButton) e.getSource();
+        if(isPlayerTurn) {
+            incrementMove();
+            if(playerType == 1) {
+                btnClicked.setIcon(XIcon);
+                boardArr[btnClicked.getPoint().x][btnClicked.getPoint().y] = 1;
+            }
+            else {
+                btnClicked.setIcon(OIcon);
+                boardArr[btnClicked.getPoint().x][btnClicked.getPoint().y] = 0;
+            }
+            btnClicked.setEnabled(false);
+            
+            if(!winCheck()) {
+                isPlayerTurn = false;
+                AIMove();
+            }
+        }
     }
 
     
