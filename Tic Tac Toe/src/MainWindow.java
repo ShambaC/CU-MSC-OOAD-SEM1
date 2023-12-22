@@ -5,6 +5,7 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.Timer;
 import javax.swing.border.Border;
 
 import java.awt.Color;
@@ -18,17 +19,26 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.util.concurrent.TimeUnit;
 
 class boardButton extends JButton {
     private Point coords;
+    private boolean isActive;
 
     public boardButton(Point coords) {
         this.coords = coords;
+        isActive = true;
     }
     
     public Point getPoint() {
         return coords;
+    }
+
+    public boolean getStatus() {
+        return isActive;
+    }
+
+    public void setStatus(boolean isActive) {
+        this.isActive = isActive;
     }
 }
 
@@ -123,7 +133,7 @@ public class MainWindow extends JFrame implements ActionListener {
         // Reset everything
         for(boardButton b : buttons) {
             b.setIcon(null);
-            b.setEnabled(true);
+            b.setStatus(true);
         }
         moves = 0;
         for(int i = 0; i < 3; i++) {
@@ -232,24 +242,25 @@ public class MainWindow extends JFrame implements ActionListener {
 
     private void AIMove() {
         if(!isPlayerTurn) {
-            try {
-                turnText.setText("AI");
-                TimeUnit.SECONDS.sleep(2);
-            }
-            catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        
-            incrementMove();
-            isPlayerTurn = true;
-            turnText.setText("Player");
+            turnText.setText("AI");
+
+            Timer timer = new Timer(2000, new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    incrementMove();
+                    isPlayerTurn = true;
+                    turnText.setText("Player");
+                }
+            });
+            timer.setRepeats(false);
+            timer.start();
         }
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
         boardButton btnClicked = (boardButton) e.getSource();
-        if(isPlayerTurn) {
+        if(isPlayerTurn && btnClicked.getStatus()) {
             incrementMove();
             if(playerType == 1) {
                 btnClicked.setIcon(XIcon);
@@ -259,7 +270,7 @@ public class MainWindow extends JFrame implements ActionListener {
                 btnClicked.setIcon(OIcon);
                 boardArr[btnClicked.getPoint().x][btnClicked.getPoint().y] = 0;
             }
-            btnClicked.setEnabled(false);
+            btnClicked.setStatus(false);
             
             if(!winCheck()) {
                 isPlayerTurn = false;
