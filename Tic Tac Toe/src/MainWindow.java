@@ -156,21 +156,7 @@ public class MainWindow extends JFrame implements ActionListener {
     }
 
     private boolean winCheck() {
-        if(moves >= 3) {
-            // //rows check
-            // for(int i = 0; i < 3; i++) {
-            //     int moveStore = -1;
-            //     for(int j = 0; j < 2; j++) {
-            //         if(j == 0 && boardArr[i][j] == -1) {
-            //             j = 2;
-            //             continue;
-            //         }
-            //         if(j == 0) {
-            //             moveStore = boardArr[i][j];
-            //         }
-            //     }
-            // }
-            
+        if(moves >= 3) {            
             if(boardArr[0][0] == boardArr[0][1] && boardArr[0][1] == boardArr[0][2] && boardArr[0][0] != -1) {
                 if(boardArr[0][0] == playerType) {
                     winner = "player";
@@ -362,7 +348,7 @@ public class MainWindow extends JFrame implements ActionListener {
                         boardArr[tempPoint.x][tempPoint.y] = AItype;
                         
                         for(boardButton b : buttons) {
-                            if(b.getPoint() == tempPoint) {
+                            if(b.getPoint().equals(tempPoint)) {
                                 if(AItype == 1) {
                                     b.setIcon(XIcon);
                                 }
@@ -379,7 +365,7 @@ public class MainWindow extends JFrame implements ActionListener {
                         boardArr[tempPoint.x][tempPoint.y] = AItype;
                         
                         for(boardButton b : buttons) {
-                            if(b.getPoint() == tempPoint) {
+                            if(b.getPoint().equals(tempPoint)) {
                                 if(AItype == 1) {
                                     b.setIcon(XIcon);
                                 }
@@ -392,6 +378,7 @@ public class MainWindow extends JFrame implements ActionListener {
                         }
                     }
                     else {
+                        System.out.println("Random block");
                         for(boardButton b : buttons) {
                             if(b.getStatus()) {
                                 boardArr[b.getPoint().x][b.getPoint().y] = AItype;
