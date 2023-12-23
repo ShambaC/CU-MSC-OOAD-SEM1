@@ -49,10 +49,14 @@ public class MainWindow extends JFrame implements ActionListener {
     private int moves = 0;
     private String winner = "none";
     private JLabel turnText;
+    private JLabel scoreText;
 
     private int playerType;
     private int AItype;
     private boolean isPlayerTurn;
+
+    private int AIScore;
+    private int PScore;
 
     private Icon XIcon = new ImageIcon(getClass().getResource("/images/X.png"));
     private Icon OIcon = new ImageIcon(getClass().getResource("/images/O.png"));
@@ -95,6 +99,9 @@ public class MainWindow extends JFrame implements ActionListener {
             }
         }
         isPlayerTurn = true;
+        
+        AIScore = 0;
+        PScore = 0;
 
         setLayout(new GridLayout(4, 3, 5, 5));
         setResizable(false);
@@ -105,7 +112,7 @@ public class MainWindow extends JFrame implements ActionListener {
         turnText = new JLabel("Player");
         turnText.setFont(new Font("Comic Sans MS", Font.PLAIN, 30));
         turnText.setHorizontalAlignment(JLabel.CENTER);
-        JLabel scoreText = new JLabel("<html>AI Score: 0<br>P Score: 0");
+        scoreText = new JLabel("<html>AI Score: " + AIScore + "<br>P Score: " + PScore);
         scoreText.setFont(new Font("Comic Sans MS", Font.PLAIN, 18));
         scoreText.setHorizontalAlignment(JLabel.CENTER);
 
@@ -147,6 +154,10 @@ public class MainWindow extends JFrame implements ActionListener {
             }
         }
         winner = "none";
+        turnText.setText("Player");
+
+        // Update score text
+        scoreText.setText("<html>AI Score: " + AIScore + "<br>P Score: " + PScore);
 
         StartGame();
     }
@@ -240,6 +251,12 @@ public class MainWindow extends JFrame implements ActionListener {
 
             if(!winner.equalsIgnoreCase("none")) {
                 JOptionPane.showMessageDialog(this, "The winner is " + winner + "!!", "Winner", JOptionPane.INFORMATION_MESSAGE);
+                if(winner.equalsIgnoreCase("AI")) {
+                    AIScore++;
+                }
+                else {
+                    PScore++;
+                }
                 RestartGame();
                 return true;
             }
