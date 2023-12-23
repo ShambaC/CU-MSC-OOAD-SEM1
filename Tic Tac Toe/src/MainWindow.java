@@ -20,7 +20,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.ArrayList;
-import java.util.Random;
 
 class boardButton extends JButton {
     private Point coords;
@@ -106,8 +105,9 @@ public class MainWindow extends JFrame implements ActionListener {
         turnText = new JLabel("Player");
         turnText.setFont(new Font("Comic Sans MS", Font.PLAIN, 30));
         turnText.setHorizontalAlignment(JLabel.CENTER);
-        JLabel scoreText = new JLabel("<html>X Score: 0<br>O Score: 0");
-        scoreText.setFont(new Font("Comic Sans MS", Font.PLAIN, 24));
+        JLabel scoreText = new JLabel("<html>AI Score: 0<br>P Score: 0");
+        scoreText.setFont(new Font("Comic Sans MS", Font.PLAIN, 18));
+        scoreText.setHorizontalAlignment(JLabel.CENTER);
 
         add(text1);
         add(turnText);
@@ -156,7 +156,23 @@ public class MainWindow extends JFrame implements ActionListener {
     }
 
     private boolean winCheck() {
-        if(moves >= 3) {            
+        if(moves >= 3) {
+            
+            // DRAW Condition
+            boolean isDraw = true;
+            for(int i = 0; i < 3; i++) {
+                for(int j = 0; j < 3; j++) {
+                    if(boardArr[i][j] == -1) {
+                        isDraw = false;
+                    }
+                }
+            }
+            if(isDraw) {
+                JOptionPane.showMessageDialog(this, "Its a Draw !!", "Draw", JOptionPane.INFORMATION_MESSAGE);
+                RestartGame();
+                return true;
+            }
+
             if(boardArr[0][0] == boardArr[0][1] && boardArr[0][1] == boardArr[0][2] && boardArr[0][0] != -1) {
                 if(boardArr[0][0] == playerType) {
                     winner = "player";
@@ -378,7 +394,6 @@ public class MainWindow extends JFrame implements ActionListener {
                         }
                     }
                     else {
-                        System.out.println("Random block");
                         for(boardButton b : buttons) {
                             if(b.getStatus()) {
                                 boardArr[b.getPoint().x][b.getPoint().y] = AItype;
