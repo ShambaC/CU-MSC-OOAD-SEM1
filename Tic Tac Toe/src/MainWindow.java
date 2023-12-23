@@ -21,8 +21,11 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.ArrayList;
 
+// Custom button class to store coordinates as well
 class boardButton extends JButton {
+    // Index location of a button on the game board grid
     private Point coords;
+    // Can place mark on the button/cell // is clickable 
     private boolean isActive;
 
     public boardButton(Point coords) {
@@ -30,42 +33,53 @@ class boardButton extends JButton {
         isActive = true;
     }
     
+    // Coords getter method
     public Point getPoint() {
         return coords;
     }
 
+    // isActive getter method
     public boolean getStatus() {
         return isActive;
     }
-
+    // isActive setter method
     public void setStatus(boolean isActive) {
         this.isActive = isActive;
     }
 }
 
 public class MainWindow extends JFrame implements ActionListener {
+    // Game board array
     private int [][] boardArr = new int[3][3];
+    // Buttons for each cell of the grid
     private boardButton [] buttons = new boardButton[9];
+    // Number of moves played for a particular session
     private int moves = 0;
     private String winner = "none";
     private JLabel turnText;
     private JLabel scoreText;
 
+    // Move type(X or O) for PC and player
     private int playerType;
     private int AItype;
+
     private boolean isPlayerTurn;
 
+    // Stores individual scores
     private int AIScore;
     private int PScore;
 
     private Icon XIcon = new ImageIcon(getClass().getResource("/images/X.png"));
     private Icon OIcon = new ImageIcon(getClass().getResource("/images/O.png"));
 
+    // Listen to keyboard key presses
     private class Dispatcher implements KeyEventDispatcher {
         @Override
         public boolean dispatchKeyEvent(KeyEvent e) {
+            // If key pressed is 'R'
             if(e.getID() == KeyEvent.KEY_PRESSED && e.getKeyCode() == KeyEvent.VK_R) {
                 System.out.println("Restarting game");
+                // Forcefully restart game
                 RestartGame();
             }
 
@@ -85,6 +99,7 @@ public class MainWindow extends JFrame implements ActionListener {
     }
 
     private void initCmp() {
+        // Initialise the array with default value and the buttons for the cells
         int count = -1;
         Border cellBorder = BorderFactory.createLineBorder(new Color(82, 81, 79), 4, true);
         for(int i = 0; i < 3; i++) {
@@ -103,9 +118,12 @@ public class MainWindow extends JFrame implements ActionListener {
         AIScore = 0;
         PScore = 0;
 
+        // Set layout with 4 rows and 3 columns with 5px gap between each cell
         setLayout(new GridLayout(4, 3, 5, 5));
+        // Prevent resizing to fix the size of the buttons
         setResizable(false);
 
+        // Fill the first row with game information
         JLabel text1 = new JLabel("<html>Your<br>Turn: ");
         text1.setFont(new Font("Comic Sans MS", Font.PLAIN, 24));
         text1.setHorizontalAlignment(JLabel.CENTER);
@@ -120,6 +138,7 @@ public class MainWindow extends JFrame implements ActionListener {
         add(turnText);
         add(scoreText);
 
+        // Add the buttons to the canvas and add actionListener to them
         for(int i = 0; i < 9; i++) {
             add(buttons[i]);
             buttons[i].addActionListener(this);
@@ -127,8 +146,10 @@ public class MainWindow extends JFrame implements ActionListener {
 
     }
 
+    // Method to start game
     private void StartGame() {
         isPlayerTurn = true;
+        // Randomly decide move symbol
         int res = (int)(Math.random() * 2);
         
         if(res == 0) {
@@ -166,24 +187,11 @@ public class MainWindow extends JFrame implements ActionListener {
         moves++;
     }
 
+    // Check if any formation on the current board state results in a win
     private boolean winCheck() {
         if(moves >= 3) {
             
-            // DRAW Condition
-            boolean isDraw = true;
-            for(int i = 0; i < 3; i++) {
-                for(int j = 0; j < 3; j++) {
-                    if(boardArr[i][j] == -1) {
-                        isDraw = false;
-                    }
-                }
-            }
-            if(isDraw) {
-                JOptionPane.showMessageDialog(this, "Its a Draw !!", "Draw", JOptionPane.INFORMATION_MESSAGE);
-                RestartGame();
-                return true;
-            }
-
+            // 3 rows check
             if(boardArr[0][0] == boardArr[0][1] && boardArr[0][1] == boardArr[0][2] && boardArr[0][0] != -1) {
                 if(boardArr[0][0] == playerType) {
                     winner = "player";
@@ -208,6 +216,7 @@ public class MainWindow extends JFrame implements ActionListener {
                     winner = "AI";
                 }
             }
+            // 3 columns check
             else if(boardArr[0][0] == boardArr[1][0] && boardArr[1][0] == boardArr[2][0] && boardArr[0][0] != -1) {
                 if(boardArr[0][0] == playerType) {
                     winner = "player";
@@ -232,6 +241,7 @@ public class MainWindow extends JFrame implements ActionListener {
                     winner = "AI";
                 }
             }
+            // 2 diagonals check
             else if(boardArr[0][0] == boardArr[1][1] && boardArr[1][1] == boardArr[2][2] && boardArr[0][0] != -1) {
                 if(boardArr[0][0] == playerType) {
                     winner = "player";
@@ -249,33 +259,63 @@ public class MainWindow extends JFrame implements ActionListener {
                 }
             }
 
+            // if winner found
             if(!winner.equalsIgnoreCase("none")) {
+                // show winner
                 JOptionPane.showMessageDialog(this, "The winner is " + winner + "!!", "Winner", JOptionPane.INFORMATION_MESSAGE);
+                // adjust score accordingly
                 if(winner.equalsIgnoreCase("AI")) {
                     AIScore++;
                 }
                 else {
                     PScore++;
                 }
+                // restart game
+                RestartGame();
+                return true;
+            }
+
+            // DRAW Condition
+            // If board is completely filled, there will be no default values.
+            // A completely filled board with no win conditions result in a draw.
+            boolean isDraw = true;
+            for(int i = 0; i < 3; i++) {
+                for(int j = 0; j < 3; j++) {
+                    if(boardArr[i][j] == -1) {
+                        isDraw = false;
+                    }
+                }
+            }
+            if(isDraw) {
+                JOptionPane.showMessageDialog(this, "Its a Draw !!", "Draw", JOptionPane.INFORMATION_MESSAGE);
                 RestartGame();
                 return true;
             }
         }
+        // No win no draw
         return false;
     }
 
+    // Computer player logic
     private void AIMove() {
         if(!isPlayerTurn) {
             turnText.setText("AI");
 
+            // wait for 2 seconds before making move, purely for cosmetic purpose
+            // using a swing timer instead of thread.sleep
+            // this is done to avoid UI update requests being blocked by making a thread sleep
             Timer timer = new Timer(2000, new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                 
                     // COMPUTER PLAYER LOGIC
+
+                    // Store locations of the cells where either AI can win or Player can win
                     ArrayList<Point> AIWinPos = new ArrayList<Point>();
                     ArrayList<Point> playerWinPos = new ArrayList<Point>();
 
+                    // These are sure win checks
+                    // Either the player is about to win or the computer
                     // ROW CHECK
                     for(int i = 0; i < 3; i++) {
                         int countPlayerMarks = 0;
@@ -293,6 +333,7 @@ public class MainWindow extends JFrame implements ActionListener {
                             }
                         }
 
+                        // if a row has 2 marks by AI only or PLayer only
                         if(countAIMarks == 2 && emptyCellLoc != -1) {
                             AIWinPos.add(new Point(i, emptyCellLoc));
                         }
@@ -318,6 +359,7 @@ public class MainWindow extends JFrame implements ActionListener {
                             }
                         }
 
+                        // same as row check but here columns are checked
                         if(countAIMarks == 2 && emptyCellLoc != -1) {
                             AIWinPos.add(new Point(emptyCellLoc, i));
                         }
@@ -376,6 +418,7 @@ public class MainWindow extends JFrame implements ActionListener {
                     }
 
                     // Place mark and make move
+                    // Prioritize computer winning moves
                     if(!AIWinPos.isEmpty()) {
                         Point tempPoint = AIWinPos.get(0);
                         boardArr[tempPoint.x][tempPoint.y] = AItype;
@@ -393,6 +436,7 @@ public class MainWindow extends JFrame implements ActionListener {
                             }
                         }
                     }
+                    // if computer cannot win, block player
                     else if(!playerWinPos.isEmpty()) {
                         Point tempPoint = playerWinPos.get(0);
                         boardArr[tempPoint.x][tempPoint.y] = AItype;
@@ -410,6 +454,7 @@ public class MainWindow extends JFrame implements ActionListener {
                             }
                         }
                     }
+                    // if there are no winning condition just place a mark randomly
                     else {
                         for(boardButton b : buttons) {
                             if(b.getStatus()) {
@@ -426,7 +471,7 @@ public class MainWindow extends JFrame implements ActionListener {
                         }
                     }
 
-
+                    // increase move number
                     incrementMove();
                     if(!winCheck()) {
                         isPlayerTurn = true;
@@ -439,6 +484,7 @@ public class MainWindow extends JFrame implements ActionListener {
         }
     }
 
+    // when player clicks a cell for their move
     @Override
     public void actionPerformed(ActionEvent e) {
         boardButton btnClicked = (boardButton) e.getSource();
