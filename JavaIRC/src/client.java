@@ -240,6 +240,7 @@ public class client extends JFrame implements Runnable {
                 connectionSocket = rootSocket.accept();
 
                 String remoteIP = connectionSocket.getRemoteSocketAddress().toString().split(":")[0].replace("/", "");
+                int remoteServerPort = Integer.parseInt(connectionSocket.getLocalSocketAddress().toString().split(":")[1]);
 
                 BufferedReader inFromFriend = new BufferedReader(new InputStreamReader(connectionSocket.getInputStream()));
                 String msg = inFromFriend.readLine();
