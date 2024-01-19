@@ -379,17 +379,20 @@ public class client extends JFrame implements Runnable {
         }
     }
 
+    public int getClientPort() {
+        return ownPort;
+    }
+
     public static void main(String[] args) {
         client C = null;
         if(args.length != 0) {
             int portArg = Integer.parseInt(args[0]);
             C = new client(portArg);
-            System.out.println("Opening server at port " + portArg);
         }
         else {
             C = new client();
-            System.out.println("Opening server at default port 9090");
         }
+        System.out.println("Opening server at port " + C.getClientPort());
         C.setVisible(true);
 
         Thread t1 = new Thread(C);
