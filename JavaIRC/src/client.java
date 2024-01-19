@@ -60,8 +60,6 @@ class Friends {
 
 public class client extends JFrame implements Runnable {
 
-    private ArrayList<Friends> friendList = new ArrayList<Friends>();
-
     ServerSocket rootSocket;
     Socket connectionSocket;
 
@@ -182,7 +180,6 @@ public class client extends JFrame implements Runnable {
                 int port = Integer.parseInt(Portfield.getText());
                 Friends f = new Friends(fName, ip, port);
 
-                friendList.add(f);
                 model.addElement(f);
                 System.out.println("Added "+ fName + " " + ip + ":" + port);
             }         
@@ -197,7 +194,7 @@ public class client extends JFrame implements Runnable {
             @Override
             public void actionPerformed(ActionEvent e) {
                 String msg = messageField.getText();
-                Friends f = friendList.get(0);
+                Friends f = model.getElementAt(0);
 
                 try {
                     sendMessage(msg, f);
@@ -262,8 +259,8 @@ public class client extends JFrame implements Runnable {
 
                 if(!isExistingFriend) {
                     model.addElement(new Friends("Anon" + model.getSize(), remoteIP, remoteServerPort));
-                    friendName = "Anon" + model.getSize();
-                    System.out.println("Added " + "Anon" + model.getSize() + " " + remoteIP + ":" + remoteServerPort);
+                    friendName = "Anon" + (model.getSize() - 1);
+                    System.out.println("Added " + "Anon" + (model.getSize() - 1) + " " + remoteIP + ":" + remoteServerPort);
                 }
 
                 BufferedReader inFromFriend = new BufferedReader(new InputStreamReader(connectionSocket.getInputStream()));
