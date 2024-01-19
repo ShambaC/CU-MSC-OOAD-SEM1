@@ -52,6 +52,10 @@ class Friends {
     public String toString() {
         return name;
     }
+
+    public boolean equals(Friends f) {
+        return (this.ip == f.getIP() && this.port == f.getPort());
+    }
 }
 
 public class client extends JFrame implements Runnable {
@@ -64,6 +68,8 @@ public class client extends JFrame implements Runnable {
     private int ownPort = 9090;
 
     JTextArea chatHistory;
+
+    DefaultListModel<Friends> model = new DefaultListModel<Friends>();
     
     public client() {
         setTitle("IRC Java");
@@ -122,7 +128,6 @@ public class client extends JFrame implements Runnable {
         gbc.weightx = 2;
         gbc.gridwidth = GridBagConstraints.REMAINDER;
 
-        DefaultListModel<Friends> model = new DefaultListModel<Friends>();
         JList friendsList = new JList(model);
         JScrollPane frndScroll = new JScrollPane(friendsList);
         frndScroll.setBorder(border);
@@ -179,7 +184,7 @@ public class client extends JFrame implements Runnable {
 
                 friendList.add(f);
                 model.addElement(f);
-                System.out.println("Added "+ fName + " " + ip + " " + port);
+                System.out.println("Added "+ fName + " " + ip + ":" + port);
             }         
             
         });
@@ -242,10 +247,29 @@ public class client extends JFrame implements Runnable {
                 String remoteIP = connectionSocket.getRemoteSocketAddress().toString().split(":")[0].replace("/", "");
                 int remoteServerPort = Integer.parseInt(connectionSocket.getLocalSocketAddress().toString().split(":")[1]);
 
+                String friendName = "";
+                boolean isExistingFriend = false;
+                for(int i = 0; i < model.getSize(); i++) {
+                    Friends fList = model.getElementAt(i);
+                    Friends fTemp = new Friends("Anon", remoteIP, remoteServerPort);
+
+                    if(fList.equals(fTemp)) {
+                        isExistingFriend = true;
+                        friendName = fList.getName();
+                        break;
+                    }
+                }
+
+                if(!isExistingFriend) {
+                    model.addElement(new Friends("Anon" + model.getSize(), remoteIP, remoteServerPort));
+                    friendName = "Anon" + model.getSize();
+                    System.out.println("Added " + "Anon" + model.getSize() + " " + remoteIP + ":" + remoteServerPort);
+                }
+
                 BufferedReader inFromFriend = new BufferedReader(new InputStreamReader(connectionSocket.getInputStream()));
                 String msg = inFromFriend.readLine();
                 connectionSocket.close();
-                chatHistory.append("ABC: " + msg + "\n");
+                chatHistory.append(friendName + ": " + msg + "\n");
                 continue;
             }
 
