@@ -74,6 +74,23 @@ class Friends {
     }
 }
 
+class ChatContent {
+    private String content;
+    private StyledDocument contentStyle;
+
+    ChatContent(String content, StyledDocument contentStyle) {
+        this.content = content;
+        this.contentStyle = contentStyle;
+    }
+
+    public String getContent() {
+        return content;
+    }
+    public StyledDocument getContentStyle() {
+        return contentStyle;
+    }
+}
+
 public class client extends JFrame implements Runnable {
     List<Friends> selectedFriends = new ArrayList<Friends>();
 
@@ -83,12 +100,12 @@ public class client extends JFrame implements Runnable {
     private int ownPort = 9090;
 
     JTextPane chatHistory;
-    StyledDocument defaultDoc;
+    ChatContent defaultChatContent;
 
     JList friendsList;
     DefaultListModel<Friends> model = new DefaultListModel<Friends>();
 
-    Map<String, StyledDocument> friendsChatHistory = new HashMap<String, StyledDocument>();
+    Map<String, ChatContent> friendsChatHistory = new HashMap<String, ChatContent>();
     Friends lastSelectedFriend = null;
     
     public client() {
@@ -154,7 +171,11 @@ public class client extends JFrame implements Runnable {
         appendToPane(chatHistory, "Your chat begins here //\n", new Color(93, 173, 92));
         chatHistory.setEditable(false);
         chatHistory.setFont(new Font("Calibri", Font.PLAIN, 22));
-        defaultDoc = chatHistory.getStyledDocument();
+        StyledDocument defaultDoc = chatHistory.getStyledDocument();
+        String defaultDocContent = chatHistory.getText();
+        defaultChatContent = new ChatContent(defaultDocContent, defaultDoc);
+
+
         JScrollPane chatScroll = new JScrollPane(chatHistory);
         chatScroll.setBorder(border);
         gb.setConstraints(chatScroll, gbc);
@@ -175,10 +196,12 @@ public class client extends JFrame implements Runnable {
                 selectedFriends = friendsList.getSelectedValuesList();
 
                 if(lastSelectedFriend != null) {
-                    friendsChatHistory.replace(lastSelectedFriend.getName(), chatHistory.getStyledDocument());
+                    friendsChatHistory.replace(lastSelectedFriend.getName(), new ChatContent(chatHistory.getText(), chatHistory.getStyledDocument()));
                 }
                 lastSelectedFriend = (Friends) friendsList.getSelectedValue();
-                chatHistory.setStyledDocument(friendsChatHistory.get(lastSelectedFriend.getName()));
+                ChatContent tempContent = friendsChatHistory.get(lastSelectedFriend.getName());
+                chatHistory.setStyledDocument(tempContent.getContentStyle());
+                chatHistory.setText(tempContent.getContent());
             }
         });
 
@@ -235,7 +258,7 @@ public class client extends JFrame implements Runnable {
                 Friends f = new Friends(fName, ip, port);
 
                 model.addElement(f);
-                friendsChatHistory.put(f.getName(), defaultDoc);
+                friendsChatHistory.put(f.getName(), defaultChatContent);
                 friendsList.setSelectedIndex(model.getSize() - 1);
                 nameField.setText("");
                 IPfield.setText("");
@@ -337,7 +360,7 @@ public class client extends JFrame implements Runnable {
                 if(!isExistingFriend) {
                     model.addElement(new Friends("Anon" + model.getSize(), remoteIP, remoteServerPort));
                     friendName = "Anon" + (model.getSize() - 1);
-                    friendsChatHistory.put(friendName, defaultDoc);
+                    friendsChatHistory.put(friendName, defaultChatContent);
                     friendsList.setSelectedIndex(model.getSize() - 1);
                     System.out.println("Added " + "Anon" + (model.getSize() - 1) + " " + remoteIP + ":" + remoteServerPort);
                 }
