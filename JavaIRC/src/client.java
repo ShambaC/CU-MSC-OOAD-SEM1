@@ -54,7 +54,7 @@ class Friends {
     }
 
     public boolean equals(Friends f) {
-        return (this.ip == f.getIP() && this.port == f.getPort());
+        return (this.ip.equalsIgnoreCase(f.getIP()) && this.port == f.getPort());
     }
 }
 
@@ -181,6 +181,9 @@ public class client extends JFrame implements Runnable {
                 Friends f = new Friends(fName, ip, port);
 
                 model.addElement(f);
+                nameField.setText("");
+                IPfield.setText("");
+                Portfield.setText("");
                 System.out.println("Added "+ fName + " " + ip + ":" + port);
             }         
             
@@ -198,6 +201,7 @@ public class client extends JFrame implements Runnable {
 
                 try {
                     sendMessage(msg, f);
+                    messageField.setText("");
                 }
                 catch(Exception err) {
                     err.printStackTrace();
@@ -228,8 +232,10 @@ public class client extends JFrame implements Runnable {
     private void sendMessage(String msg, Friends f) throws Exception {
         Socket clientSocket = new Socket(f.getIP(), f.getPort());
         OutputStream outToFriend = clientSocket.getOutputStream();
-        String msg2 = msg + "\n";
-        outToFriend.write(msg2.getBytes());
+        String ipDets = clientSocket.getLocalAddress().toString() + ":" + ownPort + "\n";
+        outToFriend.write(ipDets.getBytes());
+        msg += "\n";
+        outToFriend.write(msg.getBytes());
         chatHistory.append("You: " + msg);
     }
 
@@ -241,8 +247,10 @@ public class client extends JFrame implements Runnable {
             while(true) {
                 connectionSocket = rootSocket.accept();
 
-                String remoteIP = connectionSocket.getRemoteSocketAddress().toString().split(":")[0].replace("/", "");
-                int remoteServerPort = Integer.parseInt(connectionSocket.getLocalSocketAddress().toString().split(":")[1]);
+                BufferedReader inFromFriend = new BufferedReader(new InputStreamReader(connectionSocket.getInputStream()));
+                String ipDets = inFromFriend.readLine();
+                String remoteIP = ipDets.split(":")[0].replace("/", "");
+                int remoteServerPort = Integer.parseInt(ipDets.split(":")[1]);
 
                 String friendName = "";
                 boolean isExistingFriend = false;
@@ -263,7 +271,6 @@ public class client extends JFrame implements Runnable {
                     System.out.println("Added " + "Anon" + (model.getSize() - 1) + " " + remoteIP + ":" + remoteServerPort);
                 }
 
-                BufferedReader inFromFriend = new BufferedReader(new InputStreamReader(connectionSocket.getInputStream()));
                 String msg = inFromFriend.readLine();
                 connectionSocket.close();
                 chatHistory.append(friendName + ": " + msg + "\n");
