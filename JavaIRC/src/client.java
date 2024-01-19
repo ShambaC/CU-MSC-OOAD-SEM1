@@ -1,16 +1,23 @@
 import java.awt.FlowLayout;
 
+import javax.swing.text.AttributeSet;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.JTextPane;
+import javax.swing.ListSelectionModel;
 import javax.swing.border.Border;
+import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.StyleConstants;
+import javax.swing.text.StyleContext;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -65,7 +72,7 @@ public class client extends JFrame implements Runnable {
 
     private int ownPort = 9090;
 
-    JTextArea chatHistory;
+    JTextPane chatHistory;
 
     DefaultListModel<Friends> model = new DefaultListModel<Friends>();
     
@@ -86,6 +93,16 @@ public class client extends JFrame implements Runnable {
         init();
     }
 
+    private void appendToPane(JTextPane tp, String msg, Color C) {
+        StyleContext sc = StyleContext.getDefaultStyleContext();
+        AttributeSet aSet = sc.addAttribute(SimpleAttributeSet.EMPTY, StyleConstants.Foreground, C);
+
+        int len = tp.getDocument().getLength();
+        tp.setCaretPosition(len);
+        tp.setCharacterAttributes(aSet, false);
+        tp.replaceSelection(msg);
+    }
+
     private void init() {
         GridBagLayout gb = new GridBagLayout();
         GridBagConstraints gbc = new GridBagConstraints();
@@ -97,7 +114,7 @@ public class client extends JFrame implements Runnable {
         JPanel mainPanel = new JPanel(gb);
         mainPanel.setBackground(new Color(55, 55, 55));
 
-        Font font = new Font("Calibri", Font.PLAIN, 20);
+        Font font = new Font("Calibri", Font.PLAIN, 30);
 
         gbc.weightx = 12;
         JLabel chatTitle = new JLabel("Chat History");
@@ -117,8 +134,13 @@ public class client extends JFrame implements Runnable {
         gbc.weightx = 12;
         gbc.weighty = 12;
         gbc.gridwidth = GridBagConstraints.RELATIVE;
-        chatHistory = new JTextArea();
+        chatHistory = new JTextPane();
+        // chatHistory.setForeground(new Color(93, 173, 92));
+        chatHistory.setFont(new Font("Calibri", Font.ITALIC, 22));
+        appendToPane(chatHistory, "Your chat begins here //\n", new Color(93, 173, 92));
+        // chatHistory.append("Your chat begins here //\n");
         chatHistory.setEditable(false);
+        chatHistory.setFont(new Font("Calibri", Font.PLAIN, 22));
         JScrollPane chatScroll = new JScrollPane(chatHistory);
         chatScroll.setBorder(border);
         gb.setConstraints(chatScroll, gbc);
@@ -127,6 +149,8 @@ public class client extends JFrame implements Runnable {
         gbc.gridwidth = GridBagConstraints.REMAINDER;
 
         JList friendsList = new JList(model);
+        friendsList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+        friendsList.setFont(new Font("Calibri", Font.PLAIN, 22));
         JScrollPane frndScroll = new JScrollPane(friendsList);
         frndScroll.setBorder(border);
         gb.setConstraints(frndScroll, gbc);
@@ -177,6 +201,9 @@ public class client extends JFrame implements Runnable {
             public void actionPerformed(ActionEvent e) {
                 String fName = nameField.getText();
                 String ip = IPfield.getText();
+                if(ip.equalsIgnoreCase("localhost")) {
+                    ip = "127.0.0.1";
+                }
                 int port = Integer.parseInt(Portfield.getText());
                 Friends f = new Friends(fName, ip, port);
 
@@ -193,9 +220,19 @@ public class client extends JFrame implements Runnable {
         JButton sendButton = new JButton("Send");
         gb.setConstraints(sendButton, gbc);
 
+        messageField.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                sendButton.doClick();
+            }
+        });
         sendButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                if(model.isEmpty()) {
+                    JOptionPane.showMessageDialog(mainPanel, "No friends, make some first.", "Warning", JOptionPane.WARNING_MESSAGE);
+                }
+
                 String msg = messageField.getText();
                 Friends f = model.getElementAt(0);
 
@@ -236,7 +273,11 @@ public class client extends JFrame implements Runnable {
         outToFriend.write(ipDets.getBytes());
         msg += "\n";
         outToFriend.write(msg.getBytes());
-        chatHistory.append("You: " + msg);
+        // chatHistory.setForeground(new Color(227, 50, 68));
+        // chatHistory.append("You: " + msg);
+        chatHistory.setEditable(true);
+        appendToPane(chatHistory, "You: " + msg, new Color(227, 50, 68));
+        chatHistory.setEditable(false);
     }
 
     @Override
@@ -273,7 +314,11 @@ public class client extends JFrame implements Runnable {
 
                 String msg = inFromFriend.readLine();
                 connectionSocket.close();
-                chatHistory.append(friendName + ": " + msg + "\n");
+                // chatHistory.setForeground(new Color(68, 83, 199));
+                // chatHistory.append(friendName + ": " + msg + "\n");
+                chatHistory.setEditable(true);
+                appendToPane(chatHistory, friendName + ": " + msg + "\n", new Color(68, 83, 199));
+                chatHistory.setEditable(false);
                 continue;
             }
 
