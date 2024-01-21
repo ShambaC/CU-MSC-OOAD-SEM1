@@ -1,5 +1,3 @@
-import java.awt.FlowLayout;
-
 import javax.swing.text.AttributeSet;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListModel;
@@ -36,11 +34,15 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+
 import java.math.BigInteger;
+
 import java.net.ServerSocket;
 import java.net.Socket;
+
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -68,6 +70,10 @@ class Friends {
     }
     public String getIPPort() {
         return ip + ":" + port;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     @Override
@@ -160,8 +166,6 @@ public class client extends JFrame implements Runnable {
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.fill = GridBagConstraints.BOTH;
         gbc.insets = new Insets(4, 4, 4, 4);
-
-        // setLayout(new FlowLayout());
 
         JPanel mainPanel = new JPanel(gb);
         mainPanel.setBackground(new Color(55, 55, 55));
@@ -282,13 +286,31 @@ public class client extends JFrame implements Runnable {
                     int port = Integer.parseInt(Portfield.getText());
                     Friends f = new Friends(fName, ip, port);
 
-                    model.addElement(f);
-                    friendsChatHistory.put(getSHA256(f.getIPPort()), defaultChatContent);
-                    friendsList.setSelectedIndex(model.getSize() - 1);
+                    boolean isFriendExist = false;
+                    for(int i = 0; i < model.getSize(); i++) {
+                        Friends fList = model.getElementAt(i);
+
+                        if(f.equals(fList)) {
+                            JOptionPane.showMessageDialog(mainPanel, "Friend already exists, renamed.", "Info", JOptionPane.INFORMATION_MESSAGE);
+                            System.out.println("Renamed " + fList.getName() + " to " + fName);
+                            fList.setName(fName);
+                            isFriendExist = true;
+                            friendsList.repaint();
+                            friendsList.setSelectedIndex(i);
+                            break;
+                        }
+                    }
+
+                    if(!isFriendExist) {
+                        model.addElement(f);
+                        friendsChatHistory.put(getSHA256(f.getIPPort()), defaultChatContent);
+                        friendsList.setSelectedIndex(model.getSize() - 1);
+                        System.out.println("Added "+ fName + " " + ip + ":" + port);
+                    }
+
                     nameField.setText("");
                     IPfield.setText("");
                     Portfield.setText("");
-                    System.out.println("Added "+ fName + " " + ip + ":" + port);
                 }
                 catch(NoSuchAlgorithmException err) {}
                 catch(UnsupportedEncodingException err) {}
