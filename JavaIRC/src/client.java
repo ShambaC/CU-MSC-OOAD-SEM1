@@ -173,23 +173,28 @@ public class client extends JFrame implements Runnable {
         Font font = new Font("Calibri", Font.PLAIN, 30);
 
         gbc.weightx = 12;
+        gbc.gridwidth = 12;
         JLabel chatTitle = new JLabel("Chat History");
         chatTitle.setForeground(Color.WHITE);
         chatTitle.setFont(font);
         gb.setConstraints(chatTitle, gbc);
 
-        gbc.weightx = 2;
-        gbc.gridwidth = GridBagConstraints.REMAINDER;
+        gbc.weightx = 1;
+        gbc.gridwidth = 1;
         JLabel listTitle = new JLabel("Friends");
         listTitle.setForeground(Color.WHITE);
         listTitle.setFont(font);
         gb.setConstraints(listTitle, gbc);
 
+        gbc.gridwidth = GridBagConstraints.REMAINDER;
+        JLabel dummyLabel = new JLabel("");
+        gb.setConstraints(dummyLabel, gbc);
+
         Border border = BorderFactory.createLineBorder(Color.BLACK, 4, true);
 
         gbc.weightx = 12;
         gbc.weighty = 12;
-        gbc.gridwidth = GridBagConstraints.RELATIVE;
+        gbc.gridwidth = 12;
         chatHistory = new JTextPane();
         chatHistory.setFont(new Font("Calibri", Font.ITALIC, 22));
         appendToPane(chatHistory, "Your chat begins here //\n", new Color(93, 173, 92));
@@ -237,10 +242,10 @@ public class client extends JFrame implements Runnable {
         gbc.weighty = 1;
         gbc.gridwidth = GridBagConstraints.REMAINDER;
         JTextField messageField = new JTextField();
+        messageField.setFont(new Font("Calibri", Font.PLAIN, 20));
         gb.setConstraints(messageField, gbc);
 
         gbc.weightx = 1;
-        // gbc.gridwidth = GridBagConstraints.RELATIVE;
         gbc.gridwidth = 1;
         JLabel nameLabel = new JLabel("Name");
         nameLabel.setForeground(Color.WHITE);
@@ -249,6 +254,7 @@ public class client extends JFrame implements Runnable {
 
         gbc.weightx = 4;
         JTextField nameField = new JTextField();
+        nameField.setFont(new Font("Calibri", Font.PLAIN, 20));
         gb.setConstraints(nameField, gbc);
 
         gbc.weightx = 1;
@@ -259,6 +265,7 @@ public class client extends JFrame implements Runnable {
 
         gbc.weightx = 4;
         JTextField IPfield = new JTextField();
+        IPfield.setFont(new Font("Calibri", Font.PLAIN, 20));
         gb.setConstraints(IPfield, gbc);
 
         gbc.weightx = 1;
@@ -267,11 +274,15 @@ public class client extends JFrame implements Runnable {
         PortLabel.setFont(font);
         gb.setConstraints(PortLabel, gbc);
 
+        gbc.weightx = 2;
         JTextField Portfield = new JTextField();
+        Portfield.setFont(new Font("Calibri", Font.PLAIN, 20));
         gb.setConstraints(Portfield, gbc);
 
-        JButton addButton = new JButton("Add");
+        gbc.weightx = 1;
         gbc.gridwidth = GridBagConstraints.RELATIVE;
+        JButton addButton = new JButton("Add");
+        addButton.setFont(new Font("Calibri", Font.PLAIN, 20));
         gb.setConstraints(addButton, gbc);
 
         addButton.addActionListener(new ActionListener() {
@@ -320,6 +331,7 @@ public class client extends JFrame implements Runnable {
 
         gbc.gridwidth = GridBagConstraints.REMAINDER;
         JButton sendButton = new JButton("Send");
+        sendButton.setFont(new Font("Calibri", Font.PLAIN, 20));
         gb.setConstraints(sendButton, gbc);
 
         messageField.addActionListener(new ActionListener() {
@@ -352,6 +364,7 @@ public class client extends JFrame implements Runnable {
 
         mainPanel.add(chatTitle);
         mainPanel.add(listTitle);
+        mainPanel.add(dummyLabel);
         mainPanel.add(chatScroll);
         mainPanel.add(frndScroll);
         mainPanel.add(messageField);
