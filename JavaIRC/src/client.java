@@ -14,6 +14,7 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.ListSelectionModel;
+import javax.swing.UIManager;
 import javax.swing.border.Border;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -326,6 +327,15 @@ public class client extends JFrame implements Runnable {
         outToFriend.write(ipDets.getBytes());
         msg += "\n";
         outToFriend.write(msg.getBytes());
+
+        for(int i = 0; i < model.getSize(); i++) {
+            Friends fList = model.getElementAt(i);
+            if(fList.equals(f)) {
+                friendsList.setSelectedIndex(i);
+                break;
+            }
+        }
+
         chatHistory.setEditable(true);
         appendToPane(chatHistory, "You: " + msg, new Color(227, 50, 68));
         chatHistory.setEditable(false);
