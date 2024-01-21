@@ -35,10 +35,12 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-
+import java.io.UnsupportedEncodingException;
+import java.math.BigInteger;
 import java.net.ServerSocket;
 import java.net.Socket;
-
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -63,6 +65,9 @@ class Friends {
     }
     public int getPort() {
         return port;
+    }
+    public String getIPPort() {
+        return ip + ":" + port;
     }
 
     @Override
@@ -136,6 +141,20 @@ public class client extends JFrame implements Runnable {
         tp.replaceSelection(msg);
     }
 
+    private String getSHA256(String str) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            byte[] hash = md.digest(str.getBytes("UTF-8"));
+
+            BigInteger num = new BigInteger(1, hash);
+            StringBuilder hexStr = new StringBuilder(num.toString(16));
+
+            while(hexStr.length() < 32) {
+                hexStr.insert(0, '0');
+            }
+
+            return hexStr.toString();
+    }
+
     private void init() {
         GridBagLayout gb = new GridBagLayout();
         GridBagConstraints gbc = new GridBagConstraints();
@@ -194,15 +213,19 @@ public class client extends JFrame implements Runnable {
         friendsList.addListSelectionListener(new ListSelectionListener() {
             @Override
             public void valueChanged(ListSelectionEvent e) {
-                selectedFriends = friendsList.getSelectedValuesList();
+                try {
+                    selectedFriends = friendsList.getSelectedValuesList();
 
-                if(lastSelectedFriend != null) {
-                    friendsChatHistory.replace(lastSelectedFriend.getName(), new ChatContent(chatHistory.getText(), chatHistory.getStyledDocument()));
+                    if(lastSelectedFriend != null) {
+                        friendsChatHistory.replace(getSHA256(lastSelectedFriend.getIPPort()), new ChatContent(chatHistory.getText(), chatHistory.getStyledDocument()));
+                    }
+                    lastSelectedFriend = (Friends) friendsList.getSelectedValue();
+                    ChatContent tempContent = friendsChatHistory.get(getSHA256(lastSelectedFriend.getIPPort()));
+                    chatHistory.setText(tempContent.getContent());
+                    chatHistory.setStyledDocument(tempContent.getContentStyle());
                 }
-                lastSelectedFriend = (Friends) friendsList.getSelectedValue();
-                ChatContent tempContent = friendsChatHistory.get(lastSelectedFriend.getName());
-                chatHistory.setStyledDocument(tempContent.getContentStyle());
-                chatHistory.setText(tempContent.getContent());
+                catch(NoSuchAlgorithmException err) {}
+                catch(UnsupportedEncodingException err) {}
             }
         });
 
@@ -250,21 +273,25 @@ public class client extends JFrame implements Runnable {
         addButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String fName = nameField.getText();
-                String ip = IPfield.getText();
-                if(ip.equalsIgnoreCase("localhost")) {
-                    ip = "127.0.0.1";
-                }
-                int port = Integer.parseInt(Portfield.getText());
-                Friends f = new Friends(fName, ip, port);
+                try {
+                    String fName = nameField.getText();
+                    String ip = IPfield.getText();
+                    if(ip.equalsIgnoreCase("localhost")) {
+                        ip = "127.0.0.1";
+                    }
+                    int port = Integer.parseInt(Portfield.getText());
+                    Friends f = new Friends(fName, ip, port);
 
-                model.addElement(f);
-                friendsChatHistory.put(f.getName(), defaultChatContent);
-                friendsList.setSelectedIndex(model.getSize() - 1);
-                nameField.setText("");
-                IPfield.setText("");
-                Portfield.setText("");
-                System.out.println("Added "+ fName + " " + ip + ":" + port);
+                    model.addElement(f);
+                    friendsChatHistory.put(getSHA256(f.getIPPort()), defaultChatContent);
+                    friendsList.setSelectedIndex(model.getSize() - 1);
+                    nameField.setText("");
+                    IPfield.setText("");
+                    Portfield.setText("");
+                    System.out.println("Added "+ fName + " " + ip + ":" + port);
+                }
+                catch(NoSuchAlgorithmException err) {}
+                catch(UnsupportedEncodingException err) {}
             }         
             
         });
@@ -363,6 +390,7 @@ public class client extends JFrame implements Runnable {
                     if(fList.equals(fTemp)) {
                         isExistingFriend = true;
                         friendName = fList.getName();
+                        friendsList.setSelectedIndex(i);
                         break;
                     }
                 }
@@ -370,7 +398,7 @@ public class client extends JFrame implements Runnable {
                 if(!isExistingFriend) {
                     model.addElement(new Friends("Anon" + model.getSize(), remoteIP, remoteServerPort));
                     friendName = "Anon" + (model.getSize() - 1);
-                    friendsChatHistory.put(friendName, defaultChatContent);
+                    friendsChatHistory.put(getSHA256(remoteIP + ":" + remoteServerPort), defaultChatContent);
                     friendsList.setSelectedIndex(model.getSize() - 1);
                     System.out.println("Added " + "Anon" + (model.getSize() - 1) + " " + remoteIP + ":" + remoteServerPort);
                 }
@@ -387,6 +415,7 @@ public class client extends JFrame implements Runnable {
         catch(IOException err) {
             err.printStackTrace();
         }
+        catch(NoSuchAlgorithmException err) {}
     }
 
     public int getClientPort() {
