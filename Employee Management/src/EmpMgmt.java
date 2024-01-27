@@ -1,6 +1,22 @@
 import java.util.ArrayList;
 import java.util.List;
 
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.FlowLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+
+import javax.swing.BorderFactory;
+import javax.swing.DefaultListModel;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTabbedPane;
+import javax.swing.border.TitledBorder;
 
 class Employee {
     protected String name;
@@ -87,7 +103,55 @@ class Leader extends Employee {
     }
 }
 
-public class EmpMgmt {
+public class EmpMgmt extends JFrame {
+
+    EmpMgmt() {
+        setTitle("Employee Manager");
+        setSize(1024, 768);
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
+
+        init();
+    }
+
+    private void init() {
+
+        GridBagLayout gb = new GridBagLayout();
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.fill = GridBagConstraints.BOTH;
+        gbc.weighty = 1;
+
+        JPanel mainPanel = new JPanel(gb);
+
+        gbc.weightx = 7;
+        gbc.gridwidth = GridBagConstraints.RELATIVE;
+        gbc.insets = new Insets(6, 0, 0, 0);
+        JTabbedPane tabsMenu = new JTabbedPane(JTabbedPane.LEFT);
+
+        JPanel addTab = new JPanel();
+
+        JLabel tempLabel = new JLabel("Temporary");
+
+        addTab.add(tempLabel);
+
+        JPanel detailsTab = new JPanel();
+
+        tabsMenu.addTab("Add", addTab);
+        gb.setConstraints(tabsMenu, gbc);
+
+        gbc.weightx = 1;
+        gbc.gridwidth = GridBagConstraints.REMAINDER;
+        gbc.insets = new Insets(0, 0, 0, 0);
+        DefaultListModel<Employee> model = new DefaultListModel<Employee>();
+        JList empList = new JList(model);
+        JScrollPane empScroll = new JScrollPane(empList);
+        empScroll.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK, 2), "Employees", TitledBorder.CENTER, TitledBorder.TOP));
+        gb.setConstraints(empScroll, gbc);
+
+        mainPanel.add(tabsMenu);
+        mainPanel.add(empScroll);
+
+        add(mainPanel);
+    }
 
     public static void main(String[] args) {
         // Adding CEO
@@ -126,6 +190,10 @@ public class EmpMgmt {
         System.out.println("CEO total salary: " + CEO.getTotalSalary());
 
         System.out.println("Total workers under CEO: " + CEO.getTotalWorkers());
+
+        // UI
+        EmpMgmt E = new EmpMgmt();
+        E.setVisible(true);
 
     }
 }
