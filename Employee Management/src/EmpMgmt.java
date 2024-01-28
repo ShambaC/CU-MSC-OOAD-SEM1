@@ -31,6 +31,7 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+// Base Employee class
 class Employee {
     protected String name;
     protected String designation;
@@ -96,6 +97,7 @@ class Employee {
     }
 }
 
+// Worker class
 class Worker extends Employee {
     
     Worker(String name, String designation, String dept, int salary) {
@@ -115,6 +117,7 @@ class Worker extends Employee {
     }
 }
 
+// Leader class, has subordinates
 class Leader extends Employee {
     private List<Employee> subordinates = new ArrayList<Employee>();
 
@@ -161,7 +164,9 @@ class Leader extends Employee {
 
 public class EmpMgmt extends JFrame {
 
+    // A list model to store all the employees
     DefaultListModel<Employee> model = new DefaultListModel<Employee>();
+    // Stores the currently selected employee from the list
     Employee selectedEmployee = null;
 
     EmpMgmt() {
@@ -179,17 +184,22 @@ public class EmpMgmt extends JFrame {
         gbc.fill = GridBagConstraints.BOTH;
         gbc.weighty = 1;
 
+        // Main panel to hold everything
         JPanel mainPanel = new JPanel(gb);
 
         gbc.weightx = 7;
         gbc.gridwidth = GridBagConstraints.RELATIVE;
         gbc.insets = new Insets(6, 0, 0, 0);
+        // Tabs for operations
         JTabbedPane tabsMenu = new JTabbedPane(JTabbedPane.LEFT);
 
+        // The add tab
         JPanel addTab = new JPanel();
 
+        // Group the components in a single panel for better layout
         JPanel addLabelGroup = new JPanel(new GridLayout(0, 2, 50, 15));
 
+        // The form to add a new employee
         JLabel empType = new JLabel("Employee category: ");
         JRadioButton leaderRadio = new JRadioButton("Leader");
         JRadioButton workerRadio = new JRadioButton("Worker", true);
@@ -210,6 +220,7 @@ public class EmpMgmt extends JFrame {
         JButton addEntryButton = new JButton("Add");
         JButton clearEntriesButton = new JButton("Reset");
 
+        // Add button event listener
         addEntryButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -218,6 +229,7 @@ public class EmpMgmt extends JFrame {
                 String dep = depField.getText();
                 int salary = salaryField.getText().isBlank() ? -1 : Integer.parseInt(salaryField.getText());
 
+                // Add employee only when all the fields were properly filled
                 if(!name.isBlank() && !des.isBlank() && !dep.isBlank() && salary > 0) {
                     if(leaderRadio.isSelected()) {
                         model.addElement(new Leader(name, des, dep, salary));
@@ -233,12 +245,14 @@ public class EmpMgmt extends JFrame {
                     workerRadio.setSelected(true);
                     leaderRadio.setSelected(false);
                 }
+                // Else show warning
                 else {
                     JOptionPane.showMessageDialog(mainPanel, "There are empty fields !", "Warning", JOptionPane.WARNING_MESSAGE);
                 }
             }
         });
 
+        // A reset button to clear the form
         clearEntriesButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -265,9 +279,11 @@ public class EmpMgmt extends JFrame {
         addLabelGroup.add(clearEntriesButton);
         addTab.add(addLabelGroup);
 
+        // Queries tab to add and remove employees under a leader
         JPanel queriesTab = new JPanel();
         JPanel queriesGroup = new JPanel(new GridLayout(0, 1));
 
+        // The lists
         JLabel addSubLabel = new JLabel("Subordinates to Add: ");
         JList subSelectList = new JList();
         subSelectList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
@@ -285,6 +301,7 @@ public class EmpMgmt extends JFrame {
         queriesGroup.add(queryRun);
         queriesTab.add(queriesGroup);
 
+        // The details tab to show information for the selected employee
         JPanel detailsTab = new JPanel();
         JPanel detailsGroup = new JPanel(new GridLayout(0, 1));
 
@@ -315,6 +332,7 @@ public class EmpMgmt extends JFrame {
         tabsMenu.setEnabledAt(1, false);
         gb.setConstraints(tabsMenu, gbc);
 
+        // The list of the employees
         gbc.weightx = 1;
         gbc.gridwidth = GridBagConstraints.REMAINDER;
         gbc.insets = new Insets(0, 0, 0, 0);
@@ -323,33 +341,40 @@ public class EmpMgmt extends JFrame {
         empScroll.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK, 2), "Employees", TitledBorder.CENTER, TitledBorder.TOP));
         gb.setConstraints(empScroll, gbc);
 
+        // The button that runs the query to add or remove employees under a leader
         queryRun.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 List<Employee> selectedSubs = new ArrayList<Employee>();
                 selectedSubs = subSelectList.getSelectedValuesList();
 
+                // Add selected employees
                 for(Employee E: selectedSubs) {
                     selectedEmployee.add(E);
                 }
 
                 selectedSubs = subRemoveList.getSelectedValuesList();
 
+                // Remove the selected employees
                 for(Employee E: selectedSubs) {
                     selectedEmployee.remove(E);
                 }
 
+                // Clear the list selections after queries are done executing
                 subSelectList.clearSelection();
                 subRemoveList.clearSelection();
             }
         });
 
+        // Listener for when an employee is selected from the global list
         empList.addListSelectionListener(new ListSelectionListener() {
             @Override
             public void valueChanged(ListSelectionEvent e) {
                 selectedEmployee = (Employee) empList.getSelectedValue();
+                // If the selected employee is of type leader
                 if(selectedEmployee.isLeader()) {
                     DefaultListModel<Employee> selectionModel = new DefaultListModel<Employee>();
+                    // Add possible subordinates to the selection list
                     for(int i = 0; i < model.getSize(); i++) {
                         if(model.getElementAt(i).Equals(selectedEmployee)) {
                             continue;
@@ -358,13 +383,17 @@ public class EmpMgmt extends JFrame {
                         selectionModel.addElement(model.getElementAt(i));
                     }
                     subSelectList.setModel(selectionModel);
+                    // Add subordinates to the removal list
                     subRemoveList.setListData(selectedEmployee.getsubs().toArray());
+                    // Show the query tab
                     tabsMenu.setEnabledAt(1, true);
 
+                    // Show subordinates in the details tab
                     subLabel.setVisible(true);
                     subList.setListData(selectedEmployee.getsubs().toArray());
                     subList.setVisible(true);
                 }
+                // Else hide the leader specific details
                 else {
                     if(tabsMenu.getSelectedIndex() == 1) {
                         tabsMenu.setSelectedIndex(0);
@@ -375,6 +404,7 @@ public class EmpMgmt extends JFrame {
                     subList.setVisible(false);
                 }
                 
+                // Show all the details
                 nameLabel.setText("Name: " + selectedEmployee.getName());
                 desLabel.setText("Designation: " + selectedEmployee.getDes());
                 depLabel.setText("Department: " + selectedEmployee.getDep());
