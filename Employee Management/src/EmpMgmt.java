@@ -86,6 +86,10 @@ class Employee {
         return false;
     }
 
+    public boolean Equals(Employee E) {
+        return (E.getName().equalsIgnoreCase(name) && E.getDep().equalsIgnoreCase(dept) && E.getDes().equalsIgnoreCase(designation));
+    }
+
     @Override
     public String toString() {
         return name;
@@ -265,7 +269,7 @@ public class EmpMgmt extends JFrame {
         JPanel queriesGroup = new JPanel(new GridLayout(0, 1));
 
         JLabel addSubLabel = new JLabel("Subordinates to Add: ");
-        JList subSelectList = new JList(model);
+        JList subSelectList = new JList();
         subSelectList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         JScrollPane subSelectScroll = new JScrollPane(subSelectList);
         JLabel removeSubLabel = new JLabel("Subordinates to remove: ");
@@ -345,6 +349,15 @@ public class EmpMgmt extends JFrame {
             public void valueChanged(ListSelectionEvent e) {
                 selectedEmployee = (Employee) empList.getSelectedValue();
                 if(selectedEmployee.isLeader()) {
+                    DefaultListModel<Employee> selectionModel = new DefaultListModel<Employee>();
+                    for(int i = 0; i < model.getSize(); i++) {
+                        if(model.getElementAt(i).Equals(selectedEmployee)) {
+                            continue;
+                        }
+
+                        selectionModel.addElement(model.getElementAt(i));
+                    }
+                    subSelectList.setModel(selectionModel);
                     subRemoveList.setListData(selectedEmployee.getsubs().toArray());
                     tabsMenu.setEnabledAt(1, true);
 
