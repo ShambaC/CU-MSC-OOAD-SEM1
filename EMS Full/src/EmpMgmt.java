@@ -226,6 +226,10 @@ abstract class baseRepository {
         this.sr = sr;
     }
 
+    public StorageRepository getRepository() {
+        return sr;
+    }
+
     abstract public void SaveDB(DefaultListModel<Employee> model);
     abstract public DefaultListModel<Employee> LoadDB();
 }
