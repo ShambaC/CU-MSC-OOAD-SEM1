@@ -3,3 +3,6 @@
 
 # binaries folder
 */build
+
+# database files
+*/db
