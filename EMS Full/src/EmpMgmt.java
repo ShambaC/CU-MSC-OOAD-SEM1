@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
 
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
@@ -40,18 +41,57 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+
+import java.math.BigInteger;
+import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
+
+class hashUtil {
+    /**
+     * Utility function to get SHA256 hash of a string
+     * @param str String to hash
+     * @return The hashed string
+     * @throws NoSuchAlgorithmException
+     * @throws UnsupportedEncodingException
+     */
+    public String getSHA256(String str) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+        // Get the hashing function
+        MessageDigest md = MessageDigest.getInstance("SHA-256");
+        // Hash the string
+        byte[] hash = md.digest(str.getBytes("UTF-8"));
+
+        // Convert the hashed bytes to Hex string
+        BigInteger num = new BigInteger(1, hash);
+        StringBuilder hexStr = new StringBuilder(num.toString(16));
+
+        // Pad hex string
+        while(hexStr.length() < 32) {
+            hexStr.insert(0, '0');
+        }
+
+        // Return the padded hashed string
+        return hexStr.toString();
+    }
+}
+
 // Base Employee class
 class Employee implements Serializable {
+    protected int uid;
+    protected int supId;
     protected String name;
     protected String designation;
     protected String dept;
     protected int salary;
 
-    Employee(String name, String designation, String dept, int salary) {
+    Employee(int uid, String name, String designation, String dept, int salary) {
+        this.uid = uid;
         this.name = name;
         this.designation = designation;
         this.dept = dept;
         this.salary = salary;
+        supId = -1;
     }
 
     public String getName() {
@@ -100,6 +140,18 @@ class Employee implements Serializable {
         return (E.getName().equalsIgnoreCase(name) && E.getDep().equalsIgnoreCase(dept) && E.getDes().equalsIgnoreCase(designation));
     }
 
+    public void setSuperior(int id) {
+        this.supId = id;
+    }
+
+    public int getSuperior() {
+        return this.supId;
+    }
+
+    public int getId() {
+        return this.uid;
+    }
+
     @Override
     public String toString() {
         return name;
@@ -109,8 +161,8 @@ class Employee implements Serializable {
 // Worker class
 class Worker extends Employee {
     
-    Worker(String name, String designation, String dept, int salary) {
-		super(name, designation, dept, salary);
+    Worker(int uid, String name, String designation, String dept, int salary) {
+		super(uid, name, designation, dept, salary);
 	}
 
 	public int getTotalSalary() {
@@ -130,8 +182,8 @@ class Worker extends Employee {
 class Leader extends Employee {
     private List<Employee> subordinates = new ArrayList<Employee>();
 
-    Leader(String name, String designation, String dept, int salary) {
-		super(name, designation, dept, salary);
+    Leader(int uid, String name, String designation, String dept, int salary) {
+		super(uid, name, designation, dept, salary);
 	}
 
     public void add(Employee e) {
@@ -171,14 +223,107 @@ class Leader extends Employee {
     }
 }
 
-// BRIDGE
-interface StorageRepository{
-    public void SaveDB(DefaultListModel<Employee> model);
-    public DefaultListModel<Employee> LoadDB();
+// Data Access Object Pattern
+class DataAccessObject extends JFrame {
+
+    public void Store(TransferObject TO, boolean isNew) {
+        File f = new File("../db/EmpDataDB.csv");
+        String headingRow = "UID, SUPID, NAME, DES, DEP, SAL\n";
+
+        try {
+            if(isNew) {
+                Files.write(f.toPath(), headingRow.getBytes());
+            }
+            String row = TO.uid + "," + TO.supId + "," + TO.empName + "," + TO.empDes + "," + TO.empDep + "," + TO.empSal + "\n";
+            Files.write(f.toPath(), row.getBytes(), StandardOpenOption.APPEND);
+        }
+        catch(IOException err) {
+            err.printStackTrace();
+        }
+    }
+
+    public List<TransferObject> Load() {
+        List<TransferObject> TOList = new ArrayList<TransferObject>();
+
+        JFileChooser fc = new JFileChooser();
+        int res = fc.showOpenDialog(fc);
+
+        File f = null;
+        if(res == JFileChooser.APPROVE_OPTION) {
+            f = fc.getSelectedFile();
+        }
+
+        try {
+            String content = new String(Files.readAllBytes(f.toPath()));
+            String contentLines[] = content.split("\\r?\\n");
+            List<String> linesCSV = new ArrayList<String>();
+
+            for(int i = 0; i < contentLines.length; i++) {
+                linesCSV.add(contentLines[i]);
+            }
+
+            linesCSV.remove(0);
+
+            for(String S : linesCSV) {
+                String EData[] = S.split(",");
+                TOList.add(new TransferObject(Integer.parseInt(EData[0]), Integer.parseInt(EData[1]), EData[2], EData[3], EData[4], Integer.parseInt(EData[5])));
+            }
+
+            return TOList;
+        }
+        catch(IOException err) {
+            err.printStackTrace();
+        }
+
+        return TOList;
+    }
 }
 
-class FileStorage extends JFrame implements StorageRepository {
-    public void SaveDB(DefaultListModel<Employee> model) {
+class TransferObject {
+    public int uid;
+    public int supId;
+    public String empName;
+    public String empDes;
+    public String empDep;
+    public int empSal;
+
+    public TransferObject(int uid, int supId, String empName, String empDes, String empDep, int empSal) {
+        this.uid = uid;
+        this.supId = supId;
+        this.empName = empName;
+        this.empDes = empDes;
+        this.empDep = empDep;
+        this.empSal = empSal;
+    }
+}
+
+// BRIDGE
+class StorageRepository{
+
+    public void Store(DefaultListModel<Employee> model, String type) {
+        if(type.equalsIgnoreCase("File")) {
+            SaveFile(model);
+        }
+        else if(type.equalsIgnoreCase("DB")) {
+            SaveDB(model);
+        }
+    }
+
+    public DefaultListModel<Employee> Read(String type) {
+        DefaultListModel<Employee> model = null;
+
+        if(type.equalsIgnoreCase("File")) {
+            model = LoadFile();
+            return model;
+        }
+        else if(type.equalsIgnoreCase("DB")) {
+            return LoadDB();
+        }
+
+        return model;
+    }
+
+    private void SaveFile(DefaultListModel<Employee> model) {
 
         try {
             FileOutputStream fout = new FileOutputStream("../db/EmpData.db");
@@ -193,7 +338,7 @@ class FileStorage extends JFrame implements StorageRepository {
         }
     }
 
-    public DefaultListModel<Employee> LoadDB() {
+    private DefaultListModel<Employee> LoadFile() {
         DefaultListModel<Employee> model = new DefaultListModel<Employee>();
         JFileChooser fc = new JFileChooser();
 
@@ -217,6 +362,44 @@ class FileStorage extends JFrame implements StorageRepository {
 
         return model;
     }
+
+    private void SaveDB(DefaultListModel<Employee> model) {
+        DataAccessObject DAO = new DataAccessObject();
+        for(int i = 0; i < model.getSize(); i++) {
+            Employee E = model.getElementAt(i);
+
+            TransferObject TO = new TransferObject(E.getId(), E.getSuperior(), E.getName(), E.getDes(), E.getDep(), E.getSal());
+            DAO.Store(TO, i==0);
+        }
+    }
+
+    private DefaultListModel<Employee> LoadDB() {
+        DefaultListModel<Employee> model = new DefaultListModel<Employee>();
+        DataAccessObject DAO = new DataAccessObject();
+        List<TransferObject> TOList = new ArrayList<TransferObject>();
+        TOList = DAO.Load();
+
+        for(TransferObject T : TOList) {
+            Employee E = new Worker(T.uid, T.empName, T.empDes, T.empDep, T.empSal);
+            if(T.supId != -1) {
+                E.setSuperior(T.supId);
+            }
+
+            model.addElement(E);
+        }
+
+        for(int i = 0; i < model.getSize(); i++) {
+            Employee E = model.getElementAt(i);
+            if(E.getSuperior() != -1) {
+                Employee E2 = model.getElementAt(E.getSuperior() - 1);
+                Employee L = new Leader(E2.getId(), E2.getName(), E2.getDes(), E2.getDep(), E2.getSal());
+                L.add(E);
+                model.set(E.getSuperior() - 1, L);
+            }
+        }
+
+        return model;
+    }
 }
 
 abstract class baseRepository {
@@ -226,12 +409,8 @@ abstract class baseRepository {
         this.sr = sr;
     }
 
-    public StorageRepository getRepository() {
-        return sr;
-    }
-
-    abstract public void SaveDB(DefaultListModel<Employee> model);
-    abstract public DefaultListModel<Employee> LoadDB();
+    abstract public void Save(DefaultListModel<Employee> model, String type);
+    abstract public DefaultListModel<Employee> Load(String type);
 }
 
 class EmployeeRepository extends baseRepository {
@@ -240,12 +419,12 @@ class EmployeeRepository extends baseRepository {
     }
 
     @Override
-    public void SaveDB(DefaultListModel<Employee> model) {
-        sr.SaveDB(model);
+    public void Save(DefaultListModel<Employee> model, String type) {
+        sr.Store(model, type);
     }
     @Override
-    public DefaultListModel<Employee> LoadDB() {
-        return sr.LoadDB();
+    public DefaultListModel<Employee> Load(String type) {
+        return sr.Read(type);
     }
 }
 
@@ -319,10 +498,10 @@ public class EmpMgmt extends JFrame {
                 // Add employee only when all the fields were properly filled
                 if(!name.isBlank() && !des.isBlank() && !dep.isBlank() && salary > 0) {
                     if(leaderRadio.isSelected()) {
-                        model.addElement(new Leader(name, des, dep, salary));
+                        model.addElement(new Leader(model.getSize() + 1, name, des, dep, salary));
                     }
                     else {
-                        model.addElement(new Worker(name, des, dep, salary));
+                        model.addElement(new Worker(model.getSize() + 1, name, des, dep, salary));
                     }
 
                     nameField.setText("");
@@ -392,6 +571,9 @@ public class EmpMgmt extends JFrame {
         JPanel detailsTab = new JPanel();
         JPanel detailsGroup = new JPanel(new GridLayout(0, 1));
 
+        JLabel uidLabel = new JLabel("UID: ");
+        JLabel supLabel = new JLabel("Superior ID: ");
+        supLabel.setVisible(false);
         JLabel nameLabel = new JLabel("Name: ");
         JLabel desLabel = new JLabel("Designation: ");
         JLabel depLabel = new JLabel("Department: ");
@@ -403,6 +585,8 @@ public class EmpMgmt extends JFrame {
         JLabel totalSalary = new JLabel("Total Salary: ");
         JLabel totalWorkers = new JLabel("Total Workers: ");
 
+        detailsGroup.add(uidLabel);
+        detailsGroup.add(supLabel);
         detailsGroup.add(nameLabel);
         detailsGroup.add(desLabel);
         detailsGroup.add(depLabel);
@@ -414,11 +598,24 @@ public class EmpMgmt extends JFrame {
         detailsTab.add(detailsGroup);
 
         JPanel dataTab = new JPanel();
+        JPanel dataGorup = new JPanel(new GridLayout(0, 2, 50, 15));
+        JLabel connTypeLabel = new JLabel("Storage Type: ");
+        JPanel connRadioContainer = new JPanel();
+        ButtonGroup connRadioGroup = new ButtonGroup();
+        JRadioButton fileRadio = new JRadioButton("File", true);
+        JRadioButton DBRadio = new JRadioButton("DataBase");
+        connRadioGroup.add(fileRadio);
+        connRadioGroup.add(DBRadio);
+        connRadioContainer.add(fileRadio);
+        connRadioContainer.add(DBRadio);
         JButton saveButton = new JButton("Save");
         JButton loadButton = new JButton("Load");
 
-        dataTab.add(saveButton);
-        dataTab.add(loadButton);
+        dataGorup.add(connTypeLabel);
+        dataGorup.add(connRadioContainer);
+        dataGorup.add(saveButton);
+        dataGorup.add(loadButton);
+        dataTab.add(dataGorup);
 
         tabsMenu.addTab("Add", addTab);
         tabsMenu.addTab("Queries", queriesTab);
@@ -446,6 +643,7 @@ public class EmpMgmt extends JFrame {
                 // Add selected employees
                 for(Employee E: selectedSubs) {
                     selectedEmployee.add(E);
+                    E.setSuperior(selectedEmployee.getId());
                 }
 
                 selectedSubs = subRemoveList.getSelectedValuesList();
@@ -471,7 +669,8 @@ public class EmpMgmt extends JFrame {
                     DefaultListModel<Employee> selectionModel = new DefaultListModel<Employee>();
                     // Add possible subordinates to the selection list
                     for(int i = 0; i < model.getSize(); i++) {
-                        if(model.getElementAt(i).Equals(selectedEmployee)) {
+                        Employee tempEmp = model.getElementAt(i);
+                        if(tempEmp.Equals(selectedEmployee) || tempEmp.getSuperior() != -1) {
                             continue;
                         }
 
@@ -500,6 +699,14 @@ public class EmpMgmt extends JFrame {
                 }
                 
                 // Show all the details
+                uidLabel.setText("UID: " + selectedEmployee.getId());
+                if(selectedEmployee.getSuperior() != -1) {
+                    supLabel.setVisible(true);
+                    supLabel.setText("Superior ID: " + selectedEmployee.getSuperior());
+                }
+                else {
+                    supLabel.setVisible(false);
+                }
                 nameLabel.setText("Name: " + selectedEmployee.getName());
                 desLabel.setText("Designation: " + selectedEmployee.getDes());
                 depLabel.setText("Department: " + selectedEmployee.getDep());
@@ -513,15 +720,17 @@ public class EmpMgmt extends JFrame {
         saveButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                EmployeeRepository er = new EmployeeRepository(new FileStorage());
-                er.SaveDB(model);
+                EmployeeRepository er = new EmployeeRepository(new StorageRepository());
+                String type = fileRadio.isSelected() ? "file" : "DB";
+                er.Save(model, type);
             }
         });
         loadButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                EmployeeRepository er = new EmployeeRepository(new FileStorage());
-                model = er.LoadDB();
+                EmployeeRepository er = new EmployeeRepository(new StorageRepository());
+                String type = fileRadio.isSelected() ? "file" : "DB";
+                model = er.Load(type);
                 empList.setModel(model);
                 empList.repaint();
             }
@@ -534,43 +743,6 @@ public class EmpMgmt extends JFrame {
     }
 
     public static void main(String[] args) {
-        // Adding CEO
-        Leader CEO = new Leader("Dell", "CEO", "Company", 20000);
-
-        // Adding project leaders
-        Leader DevLead = new Leader("Jack", "Manager", "Dev", 19000);
-        Leader SalesLead = new Leader("John", "Manager", "Sales", 15000);
-
-        // Adding project leaders under CEO
-        CEO.add(DevLead);
-        CEO.add(SalesLead);
-
-        // Adding workers
-        Worker devWork0 = new Worker("Pam", "Leaf", "Dev", 12000);
-        Leader devJuniorLeader = new Leader("Sip", "JLead", "Dev", 14000);
-
-        DevLead.add(devWork0);
-        DevLead.add(devJuniorLeader);
-
-        Worker devWork1 = new Worker("Bam", "Leaf", "Dev", 11000);
-        devJuniorLeader.add(devWork1);
-
-        Worker salesWork0 = new Worker("Jon", "Leaf", "Sales", 9000);
-        Worker salesWork1 = new Worker("Bon", "Leaf", "Sales", 8000);
-
-        SalesLead.add(salesWork0);
-        SalesLead.add(salesWork1);
-
-        // Showing CEO details
-        CEO.displayEmpDets();
-
-        // Other stuff
-        System.out.println("SalesWorker1 salary: " + salesWork1.getTotalSalary());
-        System.out.println("DevLead total salary: " + DevLead.getTotalSalary());
-        System.out.println("CEO total salary: " + CEO.getTotalSalary());
-
-        System.out.println("Total workers under CEO: " + CEO.getTotalWorkers());
-
         // UI
         EmpMgmt E = new EmpMgmt();
         E.setVisible(true);
