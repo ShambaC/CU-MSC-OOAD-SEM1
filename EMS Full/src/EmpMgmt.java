@@ -18,7 +18,6 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
 
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
@@ -41,40 +40,8 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-
-import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
-
-class hashUtil {
-    /**
-     * Utility function to get SHA256 hash of a string
-     * @param str String to hash
-     * @return The hashed string
-     * @throws NoSuchAlgorithmException
-     * @throws UnsupportedEncodingException
-     */
-    public String getSHA256(String str) throws NoSuchAlgorithmException, UnsupportedEncodingException {
-        // Get the hashing function
-        MessageDigest md = MessageDigest.getInstance("SHA-256");
-        // Hash the string
-        byte[] hash = md.digest(str.getBytes("UTF-8"));
-
-        // Convert the hashed bytes to Hex string
-        BigInteger num = new BigInteger(1, hash);
-        StringBuilder hexStr = new StringBuilder(num.toString(16));
-
-        // Pad hex string
-        while(hexStr.length() < 32) {
-            hexStr.insert(0, '0');
-        }
-
-        // Return the padded hashed string
-        return hexStr.toString();
-    }
-}
 
 // Base Employee class
 class Employee implements Serializable {
