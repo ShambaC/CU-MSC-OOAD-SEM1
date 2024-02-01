@@ -1,9 +1,17 @@
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+
+import java.io.UnsupportedEncodingException;
+
+import java.math.BigInteger;
+
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -17,6 +25,32 @@ import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 
 public class UserMgmt extends JFrame {
+
+    /**
+     * Method to hash a string using the SHA-256 algorithm
+     * @param str String to hash
+     * @return Hashed string in Hex format
+     * @throws NoSuchAlgorithmException
+     * @throws UnsupportedEncodingException
+     */
+    private String getSHA256(String str) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+        // Get the hashing function
+        MessageDigest md = MessageDigest.getInstance("SHA-256");
+        // Hash the string
+        byte[] hash = md.digest(str.getBytes("UTF-8"));
+
+        // Convert the hashed bytes to Hex string
+        BigInteger num = new BigInteger(1, hash);
+        StringBuilder hexStr = new StringBuilder(num.toString(16));
+
+        // Pad hex string
+        while(hexStr.length() < 32) {
+            hexStr.insert(0, '0');
+        }
+
+        // Return the padded hashed string
+        return hexStr.toString();
+    }
     
     public UserMgmt() {
         setTitle("User Login");
@@ -29,7 +63,8 @@ public class UserMgmt extends JFrame {
     private void init() {
         JPanel mainPanel = new JPanel();
 
-        JPanel loginForm = new JPanel(new GridLayout(0, 2, 50, 15));
+        JPanel loginForm = new JPanel(new GridLayout(0, 2, 30, 15));
+        loginForm.setPreferredSize(new Dimension(500, 250));
 
         Border formBorder = BorderFactory.createCompoundBorder(BorderFactory.createTitledBorder("Login Form"), new EmptyBorder(30, 30, 30, 30));
         loginForm.setBorder(formBorder);
@@ -64,6 +99,9 @@ public class UserMgmt extends JFrame {
         loginContainer.add(forgot);
 
         mainPanel.add(loginContainer);
+
+        JPanel registerForm = new JPanel(new GridLayout(0, 2, 30, 15));
+        // registerForm.setPreferredSize(new Dimension(500, 250));
 
         add(mainPanel);
     }
