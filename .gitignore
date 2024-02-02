@@ -6,3 +6,6 @@
 
 # database files
 */db
+
+*/lib
+*/src/.env
