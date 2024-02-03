@@ -7,7 +7,6 @@
 # database files
 */db
 
-*/lib
 */src/.env
 */bin/.env
 */bin/.env.example

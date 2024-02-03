@@ -12,8 +12,6 @@ import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-import java.util.Random;
-
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -23,6 +21,7 @@ import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+import javax.swing.Timer;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 
@@ -30,7 +29,7 @@ import javax.swing.border.EmptyBorder;
 public class UserMgmt extends JFrame {
 
     private credUtil CredsObj = new credUtil();
-    private EmailUtil mailUtil = new EmailUtil();
+    private OTPUtil OTPobj = new OTPUtil();
 
     /**
      * Method to hash a string using the SHA-256 algorithm
@@ -134,31 +133,29 @@ public class UserMgmt extends JFrame {
         JLabel OTPLabel = new JLabel("OTP: ");
         JTextField OTPField = new JTextField();
         OTPField.setEnabled(false);
+        JButton resendOtpBtn = new JButton("Resend OTP");
+        resendOtpBtn.setEnabled(false);
+        resendOtpBtn.setToolTipText("You can resend OTP once every 30 seconds");
+        JPanel OTPFieldGroup = new JPanel(new GridLayout(1, 2, 10, 0));
         JButton sendOTPBtn = new JButton("Send OTP");
         JButton cancelBtn = new JButton("Cancel");
+        // After OTP sent components
+        JButton verifyOTPBtn = new JButton("Verify");
+        JButton recancelBtn = new JButton("Cancel");
         // After OTP verification components
         JLabel newPassLabel = new JLabel("Set New Password: ");
         JPasswordField newPassField = new JPasswordField();
         JButton resetPassBtn = new JButton("Reset Password");
 
+        OTPFieldGroup.add(OTPField);
+        OTPFieldGroup.add(resendOtpBtn);
+
         forgotForm.add(forgotEmailLabel);
         forgotForm.add(forgotEmailField);
         forgotForm.add(OTPLabel);
-        forgotForm.add(OTPField);
+        forgotForm.add(OTPFieldGroup);
         forgotForm.add(sendOTPBtn);
         forgotForm.add(cancelBtn);
-
-
-        ActionListener backToLoginAction = new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                mainPanel.remove(registerForm);
-                mainPanel.remove(forgotForm);
-                mainPanel.add(loginContainer);
-                revalidate();
-                repaint();
-            }
-        };
 
         loginButton.addActionListener(new ActionListener() {
             @Override
@@ -222,6 +219,8 @@ public class UserMgmt extends JFrame {
                                 String hashedPass = getSHA256(passCnf);
                                 CredsObj.addEntry(email, hashedPass);
 
+                                JOptionPane.showMessageDialog(mainPanel, "Account added!", "Info", JOptionPane.INFORMATION_MESSAGE);
+
                                 regEmailField.setText("");
                                 regPassField.setText("");
                                 regPassConfField.setText("");
@@ -242,7 +241,15 @@ public class UserMgmt extends JFrame {
             }
         });
 
-        backLoginBtn.addActionListener(backToLoginAction);
+        backLoginBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                mainPanel.remove(registerForm);
+                mainPanel.add(loginContainer);
+                revalidate();
+                repaint();
+            }
+        });
 
 
         forgot.addMouseListener(new MouseAdapter() {
@@ -255,30 +262,157 @@ public class UserMgmt extends JFrame {
             }
         });
 
+        Timer timer = new Timer(30000, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                resendOtpBtn.setEnabled(true);
+            }
+        });
+        timer.setRepeats(false);
+
         sendOTPBtn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 String mail = forgotEmailField.getText();
                 
                 if(CredsObj.isMailExists(mail)) {
-                    Random random = new Random();
-                    String otp = String.format("%04d", random.nextInt(10000));
-
-                    String mailContent = "Hello User, \nYour OTP to reset password is: " + otp;
-                    String mailSubject = "OTP for CU EMS";
-
-                    mailUtil.TLSMail(mail, mailSubject, mailContent);
+                    forgotEmailField.setEnabled(false);
+                    OTPobj.sendOTP(mail, false);
 
                     JOptionPane.showMessageDialog(mainPanel, "Mail sent", "Info", JOptionPane.INFORMATION_MESSAGE);
 
                     OTPField.setEnabled(true);
+                    timer.start();
+
+                    forgotForm.remove(sendOTPBtn);
+                    forgotForm.remove(cancelBtn);
+                    forgotForm.add(verifyOTPBtn);
+                    forgotForm.add(recancelBtn);
+                    revalidate();
+                    repaint();
                 }
                 else {
                     JOptionPane.showMessageDialog(mainPanel, "Email does not exists in our database", "Error", JOptionPane.ERROR_MESSAGE);
                 }
             }
         });
-        cancelBtn.addActionListener(backToLoginAction);
+        cancelBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                OTPField.setText("");
+                OTPField.setEnabled(false);
+                resendOtpBtn.setEnabled(false);
+                forgotEmailField.setText("");
+                mainPanel.remove(forgotForm);
+                mainPanel.add(loginContainer);
+                revalidate();
+                repaint();
+            }
+        });
+
+        resendOtpBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String mail = forgotEmailField.getText();
+                
+                if(CredsObj.isMailExists(mail)) {
+                    OTPobj.sendOTP(mail, true);
+
+                    JOptionPane.showMessageDialog(mainPanel, "Mail sent", "Info", JOptionPane.INFORMATION_MESSAGE);
+
+                    resendOtpBtn.setEnabled(false);
+                    timer.start();
+                }
+                else {
+                    JOptionPane.showMessageDialog(mainPanel, "Email does not exists in our database", "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+
+        verifyOTPBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String OTPfromField = OTPField.getText();
+                String OTPfromObj = OTPobj.getOTP();
+
+                if(OTPfromField.equals(OTPfromObj)) {
+                    timer.stop();
+
+                    OTPField.setText("");
+                    OTPField.setEnabled(false);
+                    resendOtpBtn.setEnabled(false);
+
+                    forgotForm.remove(verifyOTPBtn);
+                    forgotForm.remove(recancelBtn);
+
+                    forgotForm.add(newPassLabel);
+                    forgotForm.add(newPassField);
+                    forgotForm.add(resetPassBtn);
+                    forgotForm.add(recancelBtn);
+
+                    revalidate();
+                    repaint();
+                }
+                else {
+                    JOptionPane.showMessageDialog(mainPanel, "Incorrect OTP, try again!", "Error", JOptionPane.ERROR_MESSAGE);
+                }
+                
+            }
+        });
+
+        resetPassBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String mail = forgotEmailField.getText();
+                String pass = String.valueOf(newPassField.getPassword());
+
+                if(!pass.isBlank()) {
+                    try {
+                        String hashedPass = getSHA256(pass);
+                        CredsObj.resetPassWord(mail, hashedPass);
+    
+                        JOptionPane.showMessageDialog(mainPanel, "Password reset successfully", "Info", JOptionPane.INFORMATION_MESSAGE);
+    
+                        recancelBtn.doClick();
+                    }
+                    catch(NoSuchAlgorithmException | UnsupportedEncodingException err) {
+                        err.printStackTrace();
+                    }
+                }
+                else {
+                    JOptionPane.showMessageDialog(mainPanel, "Password field cannot be blank", "Error", JOptionPane.ERROR_MESSAGE);
+                }
+                
+            }
+        });
+
+        recancelBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                forgotEmailField.setEnabled(true);
+                OTPField.setText("");
+                OTPField.setEnabled(false);
+                resendOtpBtn.setEnabled(false);
+                timer.stop();
+                forgotEmailField.setText("");
+                newPassField.setText("");
+
+                forgotForm.remove(newPassLabel);
+                forgotForm.remove(newPassField);
+                forgotForm.remove(verifyOTPBtn);
+                forgotForm.remove(resendOtpBtn);
+                forgotForm.remove(resetPassBtn);
+                forgotForm.remove(recancelBtn);
+
+                forgotForm.add(sendOTPBtn);
+                forgotForm.add(cancelBtn);
+
+                mainPanel.remove(forgotForm);
+                mainPanel.add(loginContainer);
+                revalidate();
+                repaint();
+            }
+        });
 
         add(mainPanel);
     }
