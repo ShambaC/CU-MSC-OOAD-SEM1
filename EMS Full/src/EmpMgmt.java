@@ -189,14 +189,23 @@ class Leader extends Employee {
 // Data Access Object Pattern
 class DataAccessObject extends JFrame {
 
+    /**
+     * Takes a Transfer Object and stores the datato the database
+     * @param TO        The transfer object containing data
+     * @param isNew     Whether a new file is being created or old one is being replaced
+     */
     public void Store(TransferObject TO, boolean isNew) {
+        // Open the file to write
         File f = new File(config.empDBlocation);
+        // CSV file header row
         String headingRow = "UID, SUPID, NAME, DES, DEP, SAL\n";
 
         try {
+            // If a new file is being created, then write the headers as the first row
             if(isNew) {
                 Files.write(f.toPath(), headingRow.getBytes());
             }
+            // Write data row
             String row = TO.uid + "," + TO.supId + "," + TO.empName + "," + TO.empDes + "," + TO.empDep + "," + TO.empSal + "\n";
             Files.write(f.toPath(), row.getBytes(), StandardOpenOption.APPEND);
         }
@@ -205,6 +214,10 @@ class DataAccessObject extends JFrame {
         }
     }
 
+    /**
+     * Method to retrieve the whole list of employees from the database
+     * @return  Returns a list of Transfer Objects containing the desired data
+     */
     public List<TransferObject> Load() {
         List<TransferObject> TOList = new ArrayList<TransferObject>();
 
@@ -217,18 +230,25 @@ class DataAccessObject extends JFrame {
         }
 
         try {
+            // Get the string content of the CSV file
             String content = new String(Files.readAllBytes(f.toPath()));
+            // Split the CSV file by lines. \r is for UNIX line break
             String contentLines[] = content.split("\\r?\\n");
-            List<String> linesCSV = new ArrayList<String>();
 
+            // Store the lines into an ArrayList for easier operations
+            List<String> linesCSV = new ArrayList<String>();
             for(int i = 0; i < contentLines.length; i++) {
                 linesCSV.add(contentLines[i]);
             }
 
+            // Remove first line as it is the header row
             linesCSV.remove(0);
 
+            // Iterate through each of the remaining lines
             for(String S : linesCSV) {
+                // Split the lines by comma to get each cell value
                 String EData[] = S.split(",");
+                // Create a new Transfer object with the data and add it to the list
                 TOList.add(new TransferObject(Integer.parseInt(EData[0]), Integer.parseInt(EData[1]), EData[2], EData[3], EData[4], Integer.parseInt(EData[5])));
             }
 
@@ -242,6 +262,7 @@ class DataAccessObject extends JFrame {
     }
 }
 
+// Class that acts as a bridge between the client program and the Data Access Object
 class TransferObject {
     public int uid;
     public int supId;
@@ -260,9 +281,14 @@ class TransferObject {
     }
 }
 
-// BRIDGE
+// BRIDGE DESIGN PATTERN
 class StorageRepository{
 
+    /**
+     * Method to store the employee list to a particular file type
+     * @param model The list model containing the employee list
+     * @param type  The type of storage to use
+     */
     public void Store(DefaultListModel<Employee> model, String type) {
         if(type.equalsIgnoreCase("File")) {
             SaveFile(model);
@@ -272,6 +298,11 @@ class StorageRepository{
         }
     }
 
+    /**
+     * Method to retrieve a list of employees from a particular type of file
+     * @param type  The type of file to retrieve data from
+     * @return  The list of employees
+     */
     public DefaultListModel<Employee> Read(String type) {
         DefaultListModel<Employee> model = null;
 
@@ -286,12 +317,18 @@ class StorageRepository{
         return model;
     }
 
+    /**
+     * The method to store data to binary file
+     * @param model The list of employees to store
+     */
     private void SaveFile(DefaultListModel<Employee> model) {
 
         try {
+            // Create a stream to the file to write data
             FileOutputStream fout = new FileOutputStream(config.empFileLocation);
             ObjectOutputStream out = new ObjectOutputStream(fout);
 
+            // Store the model to the file
             out.writeObject(model);
             out.flush();
             out.close();
@@ -301,6 +338,10 @@ class StorageRepository{
         }
     }
 
+    /**
+     * Method to Load a list of employees from a binary file
+     * @return  List of employees
+     */
     private DefaultListModel<Employee> LoadFile() {
         DefaultListModel<Employee> model = new DefaultListModel<Employee>();
         JFileChooser fc = new JFileChooser();
@@ -313,6 +354,7 @@ class StorageRepository{
         }
 
         try {
+            // Read data from file and return it
             ObjectInputStream in = new ObjectInputStream(new FileInputStream(f));
             model = (DefaultListModel<Employee>) in.readObject();
             in.close();
@@ -326,36 +368,53 @@ class StorageRepository{
         return model;
     }
 
+    /**
+     * Method to store employee data into a DB, here it is a CSV file
+     * @param model List of employees to save
+     */
     private void SaveDB(DefaultListModel<Employee> model) {
         DataAccessObject DAO = new DataAccessObject();
+        // Iterate through the Employees to create a Transfer Object for them individually
         for(int i = 0; i < model.getSize(); i++) {
             Employee E = model.getElementAt(i);
 
             TransferObject TO = new TransferObject(E.getId(), E.getSuperior(), E.getName(), E.getDes(), E.getDep(), E.getSal());
+            // Save the objects
             DAO.Store(TO, i==0);
         }
     }
 
+    /**
+     * Method to retrieve employee data from the DB
+     * @return  The list of retrieved employees
+     */
     private DefaultListModel<Employee> LoadDB() {
         DefaultListModel<Employee> model = new DefaultListModel<Employee>();
         DataAccessObject DAO = new DataAccessObject();
+        // Create a list of Transfer Objects to hold data
         List<TransferObject> TOList = new ArrayList<TransferObject>();
         TOList = DAO.Load();
 
+        // Convert the transfer objects to Employee object
         for(TransferObject T : TOList) {
             Employee E = new Worker(T.uid, T.empName, T.empDes, T.empDep, T.empSal);
+            // Check if the employee has a superior
             if(T.supId != -1) {
                 E.setSuperior(T.supId);
             }
 
+            // Add employee to the list
             model.addElement(E);
         }
 
+        // Iterate through the employees to look for Workers
         for(int i = 0; i < model.getSize(); i++) {
             Employee E = model.getElementAt(i);
             if(E.getSuperior() != -1) {
+                // Get the superior
                 Employee E2 = model.getElementAt(E.getSuperior() - 1);
                 Employee L = new Leader(E2.getId(), E2.getName(), E2.getDes(), E2.getDep(), E2.getSal());
+                // Add the worker as a subordinate of the superior
                 L.add(E);
                 model.set(E.getSuperior() - 1, L);
             }
@@ -365,6 +424,7 @@ class StorageRepository{
     }
 }
 
+// Abstract class storing methods to be implemented for according  type of Storage institute
 abstract class baseRepository {
     protected StorageRepository sr;
 
@@ -376,6 +436,7 @@ abstract class baseRepository {
     abstract public DefaultListModel<Employee> Load(String type);
 }
 
+// This class calls already implemented load save methods
 class EmployeeRepository extends baseRepository {
     public EmployeeRepository(StorageRepository sr) {
         super(sr);
@@ -391,6 +452,7 @@ class EmployeeRepository extends baseRepository {
     }
 }
 
+// Main employee management class
 public class EmpMgmt extends JFrame {
 
     // A list model to store all the employees
@@ -560,6 +622,7 @@ public class EmpMgmt extends JFrame {
         detailsGroup.add(totalWorkers);
         detailsTab.add(detailsGroup);
 
+        // The data tab to store and load data from files
         JPanel dataTab = new JPanel();
         JPanel dataGorup = new JPanel(new GridLayout(0, 2, 50, 15));
         JLabel connTypeLabel = new JLabel("Storage Type: ");

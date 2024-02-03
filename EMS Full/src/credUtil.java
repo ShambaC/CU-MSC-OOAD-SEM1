@@ -8,9 +8,11 @@ import java.io.ObjectOutputStream;
 import java.util.HashMap;
 import java.util.Map;
 
+// Utility class to handle the user DB
 public class credUtil {
     private Map<String, String> creds = new HashMap<String, String>();
 
+    // Constructor initializes the DB map from the file
     public credUtil() {
         File f = new File("../db/Creds.db");
 
