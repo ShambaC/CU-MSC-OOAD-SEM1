@@ -49,7 +49,7 @@ public class credUtil {
 
     private void saveCredsToFile() {
         try {
-            FileOutputStream fout = new FileOutputStream("../db/Creds.db");
+            FileOutputStream fout = new FileOutputStream(config.credentialsFileLocation);
             ObjectOutputStream out = new ObjectOutputStream(fout);
 
             out.writeObject(creds);

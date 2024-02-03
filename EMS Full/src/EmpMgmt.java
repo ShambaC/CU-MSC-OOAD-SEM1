@@ -190,7 +190,7 @@ class Leader extends Employee {
 class DataAccessObject extends JFrame {
 
     public void Store(TransferObject TO, boolean isNew) {
-        File f = new File("../db/EmpDataDB.csv");
+        File f = new File(config.empDBlocation);
         String headingRow = "UID, SUPID, NAME, DES, DEP, SAL\n";
 
         try {
@@ -289,7 +289,7 @@ class StorageRepository{
     private void SaveFile(DefaultListModel<Employee> model) {
 
         try {
-            FileOutputStream fout = new FileOutputStream("../db/EmpData.db");
+            FileOutputStream fout = new FileOutputStream(config.empFileLocation);
             ObjectOutputStream out = new ObjectOutputStream(fout);
 
             out.writeObject(model);
