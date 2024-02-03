@@ -9,3 +9,6 @@
 
 */lib
 */src/.env
+*/bin/.env
+*/bin/.env.example
+*/bin/*.jar

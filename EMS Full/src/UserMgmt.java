@@ -6,31 +6,13 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.UnsupportedEncodingException;
 
 import java.math.BigInteger;
-import java.nio.file.Files;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Random;
 
-import javax.mail.Authenticator;
-import javax.mail.Message;
-import javax.mail.PasswordAuthentication;
-import javax.mail.Session;
-import javax.mail.Transport;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
+import java.util.Random;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -44,155 +26,6 @@ import javax.swing.SwingConstants;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 
-
-class EmailUtil {
-    private String SMTPHostName;
-    private String SMTPport;
-    private String SMTPUserName;
-    private String SMTPpass;
-
-    public EmailUtil() {
-        File f = new File("../src/.env");
-
-        try {
-            String content = new String(Files.readAllBytes(f.toPath()));
-            String lines[] = content.split("\\r?\\n");
-
-            SMTPHostName = lines[0].split("=")[1];
-            SMTPport = lines[1].split("=")[1];
-            SMTPUserName = lines[2].split("=")[1];
-            SMTPpass = lines[3].split("=")[1];
-        }
-        catch(IOException err) {
-            err.printStackTrace();
-        }
-    }
-
-    public void sendEmail(Session session, String toEmail, String subject, String body) {
-        try {
-            MimeMessage msg = new MimeMessage(session);
-
-            // Set message headers
-            msg.addHeader("Content-type", "text/HTML; charset=UTF-8");
-            msg.addHeader("format", "flowed");
-            msg.addHeader("Content-Transfer-Encoding", "8bit");
-
-            msg.setFrom(new InternetAddress("CU2024.30@example.com", "ShambaC"));
-
-            msg.setReplyTo(InternetAddress.parse("no_reply@example.com", false));
-
-            msg.setSubject(subject, "UTF-8");
-
-            msg.setText(body, "UTF-8");
-
-            msg.setSentDate(new Date());
-
-            msg.setRecipients(Message.RecipientType.TO, InternetAddress.parse(toEmail, false));
-            System.out.println("Msg is ready");
-            Transport.send(msg);
-
-            System.out.println("mail sent");
-        }
-        catch(Exception err) {
-            err.printStackTrace();
-        }
-    }
-
-    public void TLSMail(String toEmail, String subject, String body) {
-        String fromEmail = SMTPUserName;
-        String password = SMTPpass;
-        
-        Properties prop = new Properties();
-        prop.put("mail.smtp.host", SMTPHostName);
-        prop.put("mail.smtp.port", SMTPport);
-        prop.put("mail.smtp.auth", "true");
-        prop.put("mail.smtp.starttls.enable", "true");
-
-        Authenticator auth = new Authenticator() {
-            protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication(fromEmail, password);
-            }
-        };
-
-        Session session = Session.getInstance(prop, auth);
-
-        sendEmail(session, toEmail, subject, body);
-    }
-}
-
-class credUtil {
-    private Map<String, String> creds = new HashMap<String, String>();
-
-    public credUtil() {
-        File f = new File("../db/Creds.db");
-
-        if(f.exists() && !f.isDirectory()) {
-            try {
-                ObjectInputStream in = new ObjectInputStream(new FileInputStream(f));
-                creds = (HashMap) in.readObject();
-                in.close();
-            }
-            catch(IOException | ClassNotFoundException err) {
-                err.printStackTrace();
-            }
-        }
-    }
-
-    /**
-     * Checks the database to find if the mail exists
-     * @param mail The email address to check against the database
-     * @return  Whether the mail is found in DB
-     */
-    public boolean isMailExists(String mail) {
-        return creds.containsKey(mail);
-    }
-
-    /**
-     * Checks if the mail and password match the entry in the database
-     * @param mail  The mail to check
-     * @param pass  The pass associated with the mail
-     * @return  The result of matching
-     */
-    public boolean isMailPassMatch(String mail, String pass) {
-        String obtainPass = creds.get(mail);
-
-        return obtainPass.equals(pass);
-    }
-
-    private void saveCredsToFile() {
-        try {
-            FileOutputStream fout = new FileOutputStream("../db/Creds.db");
-            ObjectOutputStream out = new ObjectOutputStream(fout);
-
-            out.writeObject(creds);
-            out.flush();
-            out.close();
-        }
-        catch(IOException err) {
-            err.printStackTrace();
-        }
-    }
-
-    /**
-     * Adds a new user to the DB
-     * @param mail  Mail to add to the DB
-     * @param pass  Password for the user to be associated with the mail
-     */
-    public void addEntry(String mail, String pass) {
-        creds.put(mail, pass);
-        saveCredsToFile();
-    }
-
-    /**
-     * Resets the password with a new one for the specified mail
-     * @param mail  The mail for which the password will be changed
-     * @param pass  The new password
-     */
-    public void resetPassWord(String mail, String pass) {
-        creds.replace(mail, pass);
-        saveCredsToFile();
-    }
-}
 
 public class UserMgmt extends JFrame {
 
