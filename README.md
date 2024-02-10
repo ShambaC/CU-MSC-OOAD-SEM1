@@ -12,3 +12,5 @@ Assignments for OOPS in sem 1 2023-24
 - OnlineGDB like C compiler using sockets
 - Peer to Peer chat application (JavaIRC)
 - Basic Employee Management System
+- Employee Management System with Admin management
+- A Number converter using Observer Subject Design Pattern
