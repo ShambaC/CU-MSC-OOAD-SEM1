@@ -27,11 +27,14 @@ public class gui extends JFrame {
         JCheckBox hexBox = new JCheckBox("Hex: ");
         JCheckBox octBox = new JCheckBox("Octal: ");
 
+        // Subject
         Decimal decTextField = new Decimal();
+        // Observers
         BinField binTextField = new BinField(decTextField);
         HexField hexTextField = new HexField(decTextField);
         OctField octTextField = new OctField(decTextField);
 
+        // Add observers to the list
         decTextField.attach(binTextField);
         decTextField.attach(hexTextField);
         decTextField.attach(octTextField);
@@ -45,6 +48,7 @@ public class gui extends JFrame {
         mainPanel.add(hexTextField);
         mainPanel.add(octTextField);
 
+        // Convert the decimal number as it is typed in
         decTextField.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void changedUpdate(DocumentEvent e) {}
