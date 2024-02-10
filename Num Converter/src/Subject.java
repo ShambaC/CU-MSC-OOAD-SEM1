@@ -3,6 +3,7 @@
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 
 // ABSTRACTION
@@ -39,8 +40,14 @@ class Decimal extends Subject {
     @Override
     public void notifyObs() {
         // get text field content only when it is not blank
-        if(!this.getText().isBlank())
-            dec = Integer.parseInt(this.getText());
+        if(!this.getText().isBlank()) {
+            try {
+                dec = Integer.parseInt(this.getText());
+            }
+            catch(NumberFormatException err) {
+                JOptionPane.showMessageDialog(this, "Invalid input", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
 
         // Update observers
         for(Observer o : observerList) {
