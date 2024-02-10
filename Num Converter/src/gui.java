@@ -1,3 +1,4 @@
+import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -10,8 +11,9 @@ public class gui extends JFrame {
     
     public gui() {
         setTitle("Converter");
-        setSize(1024, 768);
+        setSize(850, 170);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setResizable(false);
 
         init();
     }
@@ -20,9 +22,10 @@ public class gui extends JFrame {
         JPanel mainPanel = new JPanel(new GridLayout(0, 4, 20, 20));
 
         JLabel decLabel = new JLabel("Decimal: ");
-        JLabel binLabel = new JLabel("Binary: ");
-        JLabel hexLabel = new JLabel("Hex: ");
-        JLabel octLabel = new JLabel("Octal: ");
+
+        JCheckBox binBox = new JCheckBox("Binary: ");
+        JCheckBox hexBox = new JCheckBox("Hex: ");
+        JCheckBox octBox = new JCheckBox("Octal: ");
 
         Decimal decTextField = new Decimal();
         BinField binTextField = new BinField(decTextField);
@@ -34,9 +37,9 @@ public class gui extends JFrame {
         decTextField.attach(octTextField);
 
         mainPanel.add(decLabel);        
-        mainPanel.add(binLabel);
-        mainPanel.add(hexLabel);
-        mainPanel.add(octLabel);
+        mainPanel.add(binBox);
+        mainPanel.add(hexBox);
+        mainPanel.add(octBox);
         mainPanel.add(decTextField);
         mainPanel.add(binTextField);
         mainPanel.add(hexTextField);
@@ -48,10 +51,30 @@ public class gui extends JFrame {
             @Override
             public void removeUpdate(DocumentEvent e) {
                 decTextField.notifyObs();
+
+                if(!binBox.isSelected()) {
+                    binTextField.setText("");
+                }
+                if(!hexBox.isSelected()) {
+                    hexTextField.setText("");
+                }
+                if(!octBox.isSelected()) {
+                    octTextField.setText("");
+                }
             }
             @Override
             public void insertUpdate(DocumentEvent e) {
                 decTextField.notifyObs();
+
+                if(!binBox.isSelected()) {
+                    binTextField.setText("");
+                }
+                if(!hexBox.isSelected()) {
+                    hexTextField.setText("");
+                }
+                if(!octBox.isSelected()) {
+                    octTextField.setText("");
+                }
             }
         });
 
